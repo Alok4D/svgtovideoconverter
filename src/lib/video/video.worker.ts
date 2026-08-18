@@ -84,7 +84,9 @@ export async function processVideoRender(job: VideoJob): Promise<VideoJobResult>
         height,
       },
       frameRange: [0, durationInFrames - 1],
-      imageFormat: 'jpeg',
+      imageFormat: 'png',
+      crf: 16,
+      pixelFormat: 'yuv420p',
       onProgress: ({ progress }) => {
         // Map remotion progress (0.0 to 1.0) to (40% to 95%)
         const currentProgress = 40 + Math.floor(progress * 55);
