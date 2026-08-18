@@ -43,15 +43,35 @@ A powerful, high-performance web application that compiles animated SVGs (SMIL, 
 If you want to run this project locally on your Windows, Mac, or Linux computer, follow these simple steps:
 
 ### 1. Prerequisites (যা যা ইন্সটল থাকতে হবে)
-- **Node.js:** v18 or v20+ must be installed on your PC.
-- **pnpm:** Recommended package manager. (Install via `npm install -g pnpm`).
-- **FFmpeg:** Required for rendering videos. You must install it on your operating system:
-  - **Windows:** 
-    1. Download the FFmpeg build from [ffmpeg.org](https://ffmpeg.org/download.html).
-    2. Extract it and add the `bin` folder path to your system's **Environment Variables (PATH)**.
-    3. *Alternatively*, install via PowerShell: `winget install Gyan.FFmpeg`
-  - **macOS:** Install via Homebrew: `brew install ffmpeg`
-  - **Linux (Ubuntu/Debian):** `sudo apt update && sudo apt install -y ffmpeg`
+আপনি চাইলে কোনো ওয়েবসাইট থেকে ডাউনলোড না করে, সরাসরি আপনার কম্পিউটারের **Terminal (PowerShell)** ব্যবহার করে এক ক্লিকে সব ইন্সটল করতে পারেন:
+
+* **Windows (PowerShell - Run as Administrator):**
+  টার্মিনালে এই কমান্ডগুলো একে একে রান করুন (এটি অটোমেটিক ডাউনলোড এবং এনভায়রনমেন্ট ভ্যারিয়েবল সেটআপ করে নেবে):
+  ```powershell
+  # ১. Node.js ইন্সটল করার জন্য:
+  winget install OpenJS.NodeJS
+  
+  # ২. FFmpeg ইন্সটল করার জন্য:
+  winget install Gyan.FFmpeg
+  
+  # ৩. pnpm ইন্সটল করার জন্য:
+  npm install -g pnpm
+  ```
+
+* **macOS (Terminal):**
+  ```bash
+  # Homebrew দিয়ে FFmpeg ইন্সটল করুন:
+  brew install ffmpeg
+  
+  # pnpm ইন্সটল করুন:
+  npm install -g pnpm
+  ```
+
+* **Linux (Ubuntu/Debian):**
+  ```bash
+  sudo apt update && sudo apt install -y ffmpeg
+  npm install -g pnpm
+  ```
 
 ### 2. Clone and Install Dependencies
 Open your terminal (PowerShell, Command Prompt, or Terminal) and run:
