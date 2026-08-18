@@ -1,10 +1,5 @@
 import mongoose from 'mongoose';
 
-const MONGODB_URL = process.env.MONGODB_URL;
-
-if (!MONGODB_URL) {
-  throw new Error('Please define the MONGODB_URL environment variable in your .env file');
-}
 
 interface MongooseCache {
   conn: typeof mongoose | null;
@@ -22,6 +17,11 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 export async function dbConnect() {
+  const MONGODB_URL = process.env.MONGODB_URL;
+  if (!MONGODB_URL) {
+    throw new Error('Please define the MONGODB_URL environment variable in your .env file');
+  }
+
   if (cached.conn) {
     return cached.conn;
   }
@@ -33,7 +33,7 @@ export async function dbConnect() {
     };
 
     console.log('[MongoDB] Connecting to cluster...');
-    cached.promise = mongoose.connect(MONGODB_URL!, opts).then((mongooseInstance) => {
+    cached.promise = mongoose.connect(MONGODB_URL, opts).then((mongooseInstance) => {
       console.log('[MongoDB] Connected successfully.');
       return mongooseInstance;
     });
