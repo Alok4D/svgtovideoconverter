@@ -36,42 +36,25 @@ import { toast } from "sonner";
 const SVG_PRESETS = [
   {
     name: "Glowing Neon Pulse",
-    code: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
-  <defs>
-    <radialGradient id="bgGrad" cx="50%" cy="50%" r="70%">
-      <stop offset="0%" stop-color="#0f172a" />
-      <stop offset="100%" stop-color="#020617" />
-    </radialGradient>
-    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="25" result="blur" />
-      <feMerge>
-        <feMergeNode in="blur" />
-        <feMergeNode in="SourceGraphic" />
-      </feMerge>
-    </filter>
-  </defs>
-  <rect width="100%" height="100%" fill="url(#bgGrad)" />
-  
-  <!-- Outer Rotating Ring -->
-  <g transform="translate(960, 540)">
-    <circle r="300" fill="none" stroke="#38bdf8" stroke-width="4" stroke-dasharray="20 40" opacity="0.6">
-      <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="8s" repeatCount="indefinite" />
-    </circle>
-    <circle r="220" fill="none" stroke="#a855f7" stroke-width="6" stroke-dasharray="60 30" opacity="0.8">
-      <animateTransform attributeName="transform" type="rotate" from="360" to="0" dur="6s" repeatCount="indefinite" />
-    </circle>
-    
-    <!-- Central Glowing Core -->
-    <circle r="120" fill="#6366f1" filter="url(#glow)" opacity="0.9">
-      <animate attributeName="r" values="110;140;110" dur="3s" repeatCount="indefinite" />
-      <animate attributeName="fill" values="#6366f1;#ec4899;#38bdf8;#6366f1" dur="6s" repeatCount="indefinite" />
-    </circle>
-    
-    <text y="10" font-family="sans-serif" font-size="28" fill="#ffffff" font-weight="900" letter-spacing="6" text-anchor="middle">
-      MOTION LAB
-    </text>
-  </g>
-</svg>`,
+    code: `<?xml version="1.0" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3840 2160" preserveAspectRatio="xMidYMid meet" class="viz-svg-overlay" style="width: 100%; height: 100%; background-color: rgb(45, 222, 3); display: block; --speed: 1.2s;"><defs><filter id="glow-filter" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="0" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><style>
+        @keyframes spinner-fade {
+            0% { opacity: 1; }
+            100% { opacity: 0.15; }
+        }
+        @keyframes spinner-rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .segment {
+            animation: spinner-fade 1.2s linear infinite;
+            fill: #FFFFFF;
+        }
+        .spinner-group {
+            transform-origin: 1920px 1080px;
+            animation: spinner-rotate calc(1.2s * 4) linear infinite;
+        }
+    </style><g class="spinner-group" filter="url(#glow-filter)"><rect class="segment" x="1875" y="450" width="90" height="280" rx="45" transform="rotate(0, 1920, 1080)" style="animation-delay: 0s;"/><rect class="segment" x="1875" y="450" width="90" height="280" rx="45" transform="rotate(30, 1920, 1080)" style="animation-delay: 0.1s;"/><rect class="segment" x="1875" y="450" width="90" height="280" rx="45" transform="rotate(60, 1920, 1080)" style="animation-delay: 0.2s;"/><rect class="segment" x="1875" y="450" width="90" height="280" rx="45" transform="rotate(90, 1920, 1080)" style="animation-delay: 0.3s;"/><rect class="segment" x="1875" y="450" width="90" height="280" rx="45" transform="rotate(120, 1920, 1080)" style="animation-delay: 0.4s;"/><rect class="segment" x="1875" y="450" width="90" height="280" rx="45" transform="rotate(150, 1920, 1080)" style="animation-delay: 0.5s;"/><rect class="segment" x="1875" y="450" width="90" height="280" rx="45" transform="rotate(180, 1920, 1080)" style="animation-delay: 0.6s;"/><rect class="segment" x="1875" y="450" width="90" height="280" rx="45" transform="rotate(210, 1920, 1080)" style="animation-delay: 0.7s;"/><rect class="segment" x="1875" y="450" width="90" height="280" rx="45" transform="rotate(240, 1920, 1080)" style="animation-delay: 0.8s;"/><rect class="segment" x="1875" y="450" width="90" height="280" rx="45" transform="rotate(270, 1920, 1080)" style="animation-delay: 0.9s;"/><rect class="segment" x="1875" y="450" width="90" height="280" rx="45" transform="rotate(300, 1920, 1080)" style="animation-delay: 1s;"/><rect class="segment" x="1875" y="450" width="90" height="280" rx="45" transform="rotate(330, 1920, 1080)" style="animation-delay: 1.1s;"/></g></svg>`,
   },
   {
     name: "Stock Cyber Portal",
@@ -347,7 +330,7 @@ export default function VideoConverterPage() {
                   }
                 }}
               >
-                <SelectTrigger className="h-9 px-4 text-xs bg-white border-[#ced4da] w-[170px] text-[#2e2e2e] rounded-full hover:border-[#5bb75b] focus:ring-[#5bb75b]">
+                <SelectTrigger className="h-10 px-3 text-sm bg-white border-[#ced4da] w-[170px] text-[#2e2e2e] rounded-[4px] hover:border-[#5bb75b] focus:ring-1 focus:ring-[#5bb75b]">
                   <SelectValue placeholder="✨ Load Preset" />
                 </SelectTrigger>
                 <SelectContent className="bg-white border-[#ced4da] text-[#2e2e2e]">
@@ -436,25 +419,22 @@ export default function VideoConverterPage() {
                 <div className="flex bg-slate-100 rounded-[3px] p-0.5 border border-[#ced4da]">
                   <button
                     onClick={() => setBgPattern("dark")}
-                    className={`px-2 py-0.5 text-[11px] rounded-[3px] transition-all ${
-                      bgPattern === "dark" ? "bg-[#5bb75b] text-white font-medium shadow-sm" : "text-slate-500 hover:text-[#2e2e2e]"
-                    }`}
+                    className={`px-2 py-0.5 text-[11px] rounded-[3px] transition-all ${bgPattern === "dark" ? "bg-[#5bb75b] text-white font-medium shadow-sm" : "text-slate-500 hover:text-[#2e2e2e]"
+                      }`}
                   >
                     Dark
                   </button>
                   <button
                     onClick={() => setBgPattern("checker")}
-                    className={`px-2 py-0.5 text-[11px] rounded-[3px] transition-all ${
-                      bgPattern === "checker" ? "bg-[#5bb75b] text-white font-medium shadow-sm" : "text-slate-500 hover:text-[#2e2e2e]"
-                    }`}
+                    className={`px-2 py-0.5 text-[11px] rounded-[3px] transition-all ${bgPattern === "checker" ? "bg-[#5bb75b] text-white font-medium shadow-sm" : "text-slate-500 hover:text-[#2e2e2e]"
+                      }`}
                   >
                     Grid
                   </button>
                   <button
                     onClick={() => setBgPattern("light")}
-                    className={`px-2 py-0.5 text-[11px] rounded-[3px] transition-all ${
-                      bgPattern === "light" ? "bg-[#5bb75b] text-white font-medium shadow-sm" : "text-slate-500 hover:text-[#2e2e2e]"
-                    }`}
+                    className={`px-2 py-0.5 text-[11px] rounded-[3px] transition-all ${bgPattern === "light" ? "bg-[#5bb75b] text-white font-medium shadow-sm" : "text-slate-500 hover:text-[#2e2e2e]"
+                      }`}
                   >
                     Light
                   </button>
@@ -474,20 +454,19 @@ export default function VideoConverterPage() {
 
             {/* Preview Frame */}
             <div
-              className={`h-[280px] p-4 flex items-center justify-center relative overflow-hidden transition-all ${
-                bgPattern === "checker"
+              className={`h-[280px] p-4 flex items-center justify-center relative overflow-hidden transition-all ${bgPattern === "checker"
                   ? "bg-slate-900"
                   : bgPattern === "light"
-                  ? "bg-slate-200"
-                  : "bg-black"
-              }`}
+                    ? "bg-slate-200"
+                    : "bg-black"
+                }`}
               style={
                 bgPattern === "checker"
                   ? {
-                      backgroundImage:
-                        "radial-gradient(circle, #334155 1px, transparent 1px)",
-                      backgroundSize: "16px 16px",
-                    }
+                    backgroundImage:
+                      "radial-gradient(circle, #334155 1px, transparent 1px)",
+                    backgroundSize: "16px 16px",
+                  }
                   : undefined
               }
             >
@@ -511,7 +490,7 @@ export default function VideoConverterPage() {
               <div className="space-y-1.5">
                 <Label className="text-xs text-[#6c757d] font-sans">Resolution</Label>
                 <Select value={resolution} onValueChange={(val) => val && setResolution(val)}>
-                  <SelectTrigger className="bg-white border-[#ced4da] text-[#2e2e2e] text-xs rounded-full h-9 px-4 hover:border-[#5bb75b] focus:ring-[#5bb75b] focus-visible:border-[#5bb75b] focus-visible:ring-[#5bb75b]">
+                  <SelectTrigger className="w-full h-10 px-3 bg-white border-[#ced4da] text-[#2e2e2e] text-sm rounded-[4px] hover:border-[#5bb75b] focus:ring-1 focus:ring-[#5bb75b] focus-visible:border-[#5bb75b]">
                     <SelectValue placeholder="Resolution" />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-[#ced4da] text-[#2e2e2e]">
@@ -528,7 +507,7 @@ export default function VideoConverterPage() {
               <div className="space-y-1.5">
                 <Label className="text-xs text-[#6c757d] font-sans">Frame Rate</Label>
                 <Select value={fps} onValueChange={(val) => val && setFps(val)}>
-                  <SelectTrigger className="bg-white border-[#ced4da] text-[#2e2e2e] text-xs rounded-full h-9 px-4 hover:border-[#5bb75b] focus:ring-[#5bb75b] focus-visible:border-[#5bb75b] focus-visible:ring-[#5bb75b]">
+                  <SelectTrigger className="w-full h-10 px-3 bg-white border-[#ced4da] text-[#2e2e2e] text-sm rounded-[4px] hover:border-[#5bb75b] focus:ring-1 focus:ring-[#5bb75b] focus-visible:border-[#5bb75b]">
                     <SelectValue placeholder="FPS" />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-[#ced4da] text-[#2e2e2e]">
@@ -543,7 +522,7 @@ export default function VideoConverterPage() {
               <div className="sm:col-span-2 space-y-1.5">
                 <Label className="text-xs text-[#6c757d] font-sans">Video Codec</Label>
                 <Select value={codec} onValueChange={(val) => val && setCodec(val as any)}>
-                  <SelectTrigger className="bg-white border-[#ced4da] text-[#2e2e2e] text-xs rounded-full h-9 px-4 hover:border-[#5bb75b] focus:ring-[#5bb75b] focus-visible:border-[#5bb75b] focus-visible:ring-[#5bb75b]">
+                  <SelectTrigger className="w-full h-10 px-3 bg-white border-[#ced4da] text-[#2e2e2e] text-sm rounded-[4px] hover:border-[#5bb75b] focus:ring-1 focus:ring-[#5bb75b] focus-visible:border-[#5bb75b]">
                     <SelectValue placeholder="Codec" />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-[#ced4da] text-[#2e2e2e]">
@@ -562,11 +541,10 @@ export default function VideoConverterPage() {
                       <button
                         key={sec}
                         onClick={() => setDuration(sec.toString())}
-                        className={`px-2 py-0.5 rounded-[3px] text-[11px] border transition-colors ${
-                          duration === sec.toString()
+                        className={`px-2 py-0.5 rounded-[3px] text-[11px] border transition-colors ${duration === sec.toString()
                             ? "bg-[#5bb75b] border-[#5bb75b] text-white font-medium shadow-sm"
                             : "bg-white border-slate-300 text-slate-700 hover:border-slate-400 hover:bg-slate-50"
-                        }`}
+                          }`}
                       >
                         {sec}s
                       </button>

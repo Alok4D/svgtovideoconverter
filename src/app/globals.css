@@ -137,3 +137,7 @@
     @apply font-sans;
   }
 }
+
+button, a{
+  cursor: pointer;
+}
