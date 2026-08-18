@@ -351,6 +351,21 @@ const SVG_PRESETS = [
   },
 ];
 
+const DEFAULT_PRESET_METADATA: Record<string, { title: string; keywords: string }> = {
+  "Glowing Neon Pulse": {
+    title: "Glowing Neon Loading Pulse Animation, Green Screen Background Loop",
+    keywords: "neon, pulse, green screen, chroma key, loading spinner, loading loop, progress bar, glowing circle, futuristic, interface, loader, waiting screen, design element, animation, flat design"
+  },
+  "Stock Cyber Portal": {
+    title: "Cyberpunk HUD Portal Interface, Neon Cyan and Magenta Sci-Fi Core",
+    keywords: "cyberpunk, hud, portal, neon, sci-fi, science fiction, technology, cyberspace, network core, tech grid, magenta, cyan, motion graphic, loading screen, high tech, geometric loop"
+  },
+  "Modern Floating Waves": {
+    title: "Abstract Glassmorphism Fluid Waves Loop, Neon Aurora Tech Flow",
+    keywords: "abstract, fluid wave, waves, glassmorphism, aurora, liquid, tech flow, contour line, dot matrix, purple, magenta, gradient flow, vector motion, modern background, soft glow"
+  }
+};
+
 export default function VideoConverterPage() {
   const [svgCode, setSvgCode] = useState(SVG_PRESETS[0].code);
   const [resolution, setResolution] = useState("3840x2160"); // 4K default
@@ -380,6 +395,10 @@ export default function VideoConverterPage() {
 
   const [activeMobileTab, setActiveMobileTab] = useState<"editor" | "preview">("editor");
   const [isFullscreenPreview, setIsFullscreenPreview] = useState(false);
+  const [activePresetName, setActivePresetName] = useState(SVG_PRESETS[0].name);
+  const [metadataTitle, setMetadataTitle] = useState("");
+  const [metadataKeywords, setMetadataKeywords] = useState("");
+  const [isGeneratingMetadata, setIsGeneratingMetadata] = useState(false);
 
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -493,6 +512,14 @@ export default function VideoConverterPage() {
             if (statusData.result?.videoUrl) {
               setGeneratedVideoUrl(statusData.result.videoUrl);
               setVideoDetails(statusData.result);
+              
+              // Option A: Automatically populate default offline metadata immediately on completion
+              const defaultMeta = DEFAULT_PRESET_METADATA[activePresetName] || {
+                title: `${activePresetName === "Custom SVG" ? "Custom" : activePresetName} SVG Animation Loop, Modern Graphic Design Vector Video`,
+                keywords: "custom svg, svg animation, vector motion, graphic design, abstract vector, loop animation, overlay, web animation, custom design"
+              };
+              setMetadataTitle(defaultMeta.title);
+              setMetadataKeywords(defaultMeta.keywords);
             }
           } else if (statusData.state === "failed") {
             if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
@@ -518,6 +545,42 @@ export default function VideoConverterPage() {
       toast.error("Export Error", {
         description: err.message || "Could not start video export.",
       });
+    }
+  };
+
+  const handleGenerateAIMetadata = async () => {
+    setIsGeneratingMetadata(true);
+    toast.loading("Generating optimized marketplace metadata...", { id: "meta-toast" });
+    try {
+      const response = await fetch("/api/video/metadata", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          presetName: activePresetName,
+          svgCode: svgCode,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to generate metadata");
+      }
+
+      const result = await response.json();
+      if (result.title) setMetadataTitle(result.title);
+      if (result.keywords) setMetadataKeywords(result.keywords);
+
+      toast.success("AI Metadata Generated Successfully!", { id: "meta-toast" });
+    } catch (err: any) {
+      console.error(err);
+      toast.error("AI Metadata Generation Failed", {
+        id: "meta-toast",
+        description: err.message || "Could not connect to Gemini API."
+      });
+    } finally {
+      setIsGeneratingMetadata(false);
     }
   };
 
@@ -609,6 +672,12 @@ export default function VideoConverterPage() {
                   const preset = SVG_PRESETS.find((p) => p.name === val);
                   if (preset) {
                     setSvgCode(preset.code);
+                    setActivePresetName(preset.name);
+                    const defaultMeta = DEFAULT_PRESET_METADATA[preset.name];
+                    if (defaultMeta) {
+                      setMetadataTitle(defaultMeta.title);
+                      setMetadataKeywords(defaultMeta.keywords);
+                    }
                     toast.info(`Loaded "${preset.name}" preset`);
                   }
                 }}
@@ -674,7 +743,20 @@ export default function VideoConverterPage() {
               defaultLanguage="xml"
               theme="vs-dark"
               value={svgCode}
-              onChange={(value) => setSvgCode(value || "")}
+              onChange={(value) => {
+                if (value) {
+                  setSvgCode(value);
+                  const preset = SVG_PRESETS.find((p) => p.code === value);
+                  if (preset) {
+                    setActivePresetName(preset.name);
+                  } else {
+                    setActivePresetName("Custom SVG");
+                  }
+                } else {
+                  setSvgCode("");
+                  setActivePresetName("Custom SVG");
+                }
+              }}
               options={{
                 minimap: { enabled: false },
                 fontSize: 13,
@@ -961,6 +1043,148 @@ export default function VideoConverterPage() {
                     )}
                   </div>
                 )}
+              </div>
+            </div>
+          )}
+
+          {/* Marketplace SEO Kit Card */}
+          {generatedVideoUrl && !isExporting && (
+            <div className="rounded-[4px] border border-[#ced4da] bg-white p-5 shadow-sm flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
+              <div className="flex items-center justify-between border-b border-[#ced4da] pb-3">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-[#5bb75b]" />
+                  <h2 className="text-sm font-semibold text-[#2e2e2e] font-sans">Marketplace SEO Kit</h2>
+                </div>
+                <Button
+                  onClick={handleGenerateAIMetadata}
+                  disabled={isGeneratingMetadata}
+                  size="sm"
+                  className="bg-[#5bb75b] hover:bg-[#449d44] text-white text-xs font-semibold rounded-[4px] h-8 px-3 transition-all active:scale-95 border-0 shadow-sm"
+                >
+                  {isGeneratingMetadata ? (
+                    <>
+                      <Loader2 className="h-3 w-3 animate-spin mr-1.5" />
+                      Optimizing...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-3 w-3 mr-1.5" />
+                      Enhance with Gemini AI
+                    </>
+                  )}
+                </Button>
+              </div>
+
+              {/* Title Generator Field */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs text-[#6c757d] font-sans">Stock Video Title</Label>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 text-[10px] text-[#6c757d] hover:text-[#2e2e2e] p-1 gap-1"
+                    onClick={() => {
+                      navigator.clipboard.writeText(metadataTitle);
+                      toast.success("Copied title to clipboard!");
+                    }}
+                  >
+                    <Copy className="h-3 w-3" />
+                    Copy Title
+                  </Button>
+                </div>
+                <Input
+                  value={metadataTitle}
+                  onChange={(e) => setMetadataTitle(e.target.value)}
+                  className="w-full h-10 px-3 bg-[#f8f9fa] border-[#ced4da] text-[#2e2e2e] text-xs font-sans rounded-[4px]"
+                  placeholder="Generating title..."
+                />
+              </div>
+
+              {/* Keywords Tag Cloud Field */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs text-[#6c757d] font-sans">Search Tags / Keywords ({metadataKeywords.split(",").filter(Boolean).length})</Label>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 text-[10px] text-[#6c757d] hover:text-[#2e2e2e] p-1 gap-1"
+                    onClick={() => {
+                      navigator.clipboard.writeText(metadataKeywords);
+                      toast.success("Copied keywords to clipboard!");
+                    }}
+                  >
+                    <Copy className="h-3 w-3" />
+                    Copy Tags
+                  </Button>
+                </div>
+                
+                {/* Visual badges container */}
+                <div className="flex flex-wrap gap-1.5 p-3 bg-[#f8f9fa] border border-[#ced4da] rounded-[4px] max-h-[160px] overflow-y-auto w-full">
+                  {metadataKeywords.split(",").filter(Boolean).map((tag, idx) => (
+                    <span
+                      key={idx}
+                      className="inline-flex items-center text-[10px] px-2 py-0.5 rounded-[3px] bg-white border border-[#ced4da] text-slate-700 font-sans shadow-sm"
+                    >
+                      {tag.trim()}
+                    </span>
+                  ))}
+                  {metadataKeywords.split(",").filter(Boolean).length === 0 && (
+                    <span className="text-xs text-[#6c757d] italic font-sans">No tags generated yet.</span>
+                  )}
+                </div>
+              </div>
+
+              {/* CSV Export Option */}
+              <div className="flex items-center justify-between bg-slate-50 border border-slate-200 p-3 rounded-[4px] mt-1.5">
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-[11px] font-bold text-[#2e2e2e] font-sans">Bulk Metadata CSV Export</span>
+                  <span className="text-[9px] text-[#6c757d] font-sans font-normal">Perfect for uploading multiple files to stock agency dashboards.</span>
+                </div>
+                <div className="flex gap-2 shrink-0">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 text-xs border-[#ced4da] bg-white hover:bg-slate-50 text-[#2e2e2e] rounded-[4px] shadow-sm font-semibold transition-all active:scale-95"
+                    onClick={() => {
+                      const txtContent = `TITLE:\n${metadataTitle}\n\nKEYWORDS:\n${metadataKeywords}`;
+                      const encodedUri = "data:text/plain;charset=utf-8," + encodeURIComponent(txtContent);
+                      const link = document.createElement("a");
+                      link.setAttribute("href", encodedUri);
+                      link.setAttribute("download", "metadata.txt");
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                      toast.success("Downloaded TXT metadata file!");
+                    }}
+                  >
+                    Export TXT
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 text-xs border-[#ced4da] bg-white hover:bg-slate-50 text-[#2e2e2e] rounded-[4px] shadow-sm font-semibold transition-all active:scale-95"
+                    onClick={() => {
+                      const csvContent = "data:text/csv;charset=utf-8," 
+                        + ["Filename", "Title", "Keywords", "Category"].join(",") + "\n"
+                        + [
+                            videoDetails?.codec === "prores" ? "stock-video-prores.mov" : "stock-video.mp4",
+                            `"${metadataTitle.replace(/"/g, '""')}"`,
+                            `"${metadataKeywords.replace(/"/g, '""')}"`,
+                            "Abstract"
+                          ].join(",");
+                      const encodedUri = encodeURI(csvContent);
+                      const link = document.createElement("a");
+                      link.setAttribute("href", encodedUri);
+                      link.setAttribute("download", "marketplace-metadata.csv");
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                      toast.success("Downloaded CSV metadata spreadsheet!");
+                    }}
+                  >
+                    Export CSV
+                  </Button>
+                </div>
               </div>
             </div>
           )}
