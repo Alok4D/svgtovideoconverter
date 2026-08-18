@@ -1,4 +1,6 @@
 import EventEmitter from 'events';
+import { dbConnect } from '../db';
+import RenderJob from '../../models/Job';
 
 export type JobState = 'waiting' | 'active' | 'completed' | 'failed';
 
@@ -44,7 +46,7 @@ class VideoJobQueue extends EventEmitter {
 
   constructor() {
     super();
-    // Periodically clean up old completed/failed jobs older than 1 hour
+    // Periodically clean up old completed/failed jobs older than 1 hour from memory
     setInterval(() => {
       const oneHourAgo = Date.now() - 60 * 60 * 1000;
       for (const [id, job] of this.jobs.entries()) {
@@ -72,13 +74,47 @@ class VideoJobQueue extends EventEmitter {
       returnvalue: null,
       failedReason: null,
       createdAt: Date.now(),
-      getState: async () => job.state,
+      getState: async () => {
+        try {
+          await dbConnect();
+          const dbJob = await RenderJob.findOne({ jobId: id });
+          return dbJob ? dbJob.state : job.state;
+        } catch {
+          return job.state;
+        }
+      },
       updateProgress: async (progress: number, stage?: string) => {
         job.progress = Math.min(100, Math.max(0, progress));
         if (stage) job.stage = stage;
         this.emit('progress', { jobId: job.id, progress: job.progress, stage: job.stage });
+        
+        try {
+          await dbConnect();
+          await RenderJob.updateOne(
+            { jobId: job.id },
+            { $set: { progress: job.progress, stage: job.stage } }
+          );
+        } catch (dbErr) {
+          console.error(`[Job ${job.id}] Failed to save progress update to MongoDB:`, dbErr);
+        }
       },
     };
+
+    // Save to database
+    try {
+      await dbConnect();
+      await RenderJob.create({
+        jobId: id,
+        state: 'waiting',
+        progress: 0,
+        stage: 'In Queue',
+        data,
+        result: null,
+        failedReason: null,
+      });
+    } catch (dbErr) {
+      console.error(`[Job ${id}] Failed to create render job document in MongoDB:`, dbErr);
+    }
 
     this.jobs.set(id, job);
     this.queue.push(id);
@@ -91,7 +127,39 @@ class VideoJobQueue extends EventEmitter {
   }
 
   public async getJob(id: string): Promise<VideoJob | null> {
-    return this.jobs.get(id) || null;
+    const memoryJob = this.jobs.get(id);
+    if (memoryJob) return memoryJob;
+
+    // Fallback: Retrieve from MongoDB
+    try {
+      await dbConnect();
+      const dbJob = await RenderJob.findOne({ jobId: id });
+      if (!dbJob) return null;
+
+      const job: VideoJob = {
+        id: dbJob.jobId,
+        data: dbJob.data as any,
+        state: dbJob.state,
+        progress: dbJob.progress,
+        stage: dbJob.stage,
+        returnvalue: dbJob.result as any,
+        failedReason: dbJob.failedReason,
+        createdAt: dbJob.createdAt ? new Date(dbJob.createdAt).getTime() : Date.now(),
+        getState: async () => {
+          try {
+            const currentJob = await RenderJob.findOne({ jobId: id });
+            return currentJob ? currentJob.state : 'failed';
+          } catch {
+            return dbJob.state;
+          }
+        },
+        updateProgress: async () => {}, // Loaded completed jobs do not update progress
+      };
+      return job;
+    } catch (err) {
+      console.error(`[MongoDB] Failed to retrieve job ${id}:`, err);
+      return null;
+    }
   }
 
   private async processNext() {
@@ -115,6 +183,17 @@ class VideoJobQueue extends EventEmitter {
     job.progress = 5;
     this.emit('active', job);
 
+    // Save to database
+    try {
+      await dbConnect();
+      await RenderJob.updateOne(
+        { jobId: job.id },
+        { $set: { state: 'active', startedAt: new Date(), stage: job.stage, progress: job.progress } }
+      );
+    } catch (dbErr) {
+      console.error(`[Job ${job.id}] Failed to save active state to MongoDB:`, dbErr);
+    }
+
     try {
       const result = await this.processor(job);
       job.state = 'completed';
@@ -123,11 +202,33 @@ class VideoJobQueue extends EventEmitter {
       job.returnvalue = result;
       job.completedAt = Date.now();
       this.emit('completed', job);
+
+      // Save to database
+      try {
+        await dbConnect();
+        await RenderJob.updateOne(
+          { jobId: job.id },
+          { $set: { state: 'completed', completedAt: new Date(), stage: job.stage, progress: 100, result } }
+        );
+      } catch (dbErr) {
+        console.error(`[Job ${job.id}] Failed to save completed state to MongoDB:`, dbErr);
+      }
     } catch (err: any) {
       job.state = 'failed';
       job.failedReason = err?.message || 'Video generation failed';
       job.stage = 'Failed';
       this.emit('failed', job, err);
+
+      // Save to database
+      try {
+        await dbConnect();
+        await RenderJob.updateOne(
+          { jobId: job.id },
+          { $set: { state: 'failed', stage: 'Failed', failedReason: job.failedReason } }
+        );
+      } catch (dbErr) {
+        console.error(`[Job ${job.id}] Failed to save failed state to MongoDB:`, dbErr);
+      }
       console.error(`[Job ${job.id}] Execution failed:`, err);
     } finally {
       this.isProcessing = false;
@@ -136,7 +237,6 @@ class VideoJobQueue extends EventEmitter {
   }
 }
 
-// Global singleton instance so it persists across API route invocations in dev and prod
 const globalForQueue = globalThis as unknown as { videoJobQueue?: VideoJobQueue };
 export const videoQueue = globalForQueue.videoJobQueue || new VideoJobQueue();
 if (process.env.NODE_ENV !== 'production') {
@@ -146,4 +246,3 @@ if (process.env.NODE_ENV !== 'production') {
 export const addVideoJob = async (jobData: VideoJobData) => {
   return await videoQueue.add('render', jobData);
 };
-

@@ -1,40 +1,17 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import Editor from "@monaco-editor/react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Loader2,
-  Download,
-  Play,
-  Pause,
-  RotateCcw,
-  Video,
-  Code2,
-  Sparkles,
-  UploadCloud,
-  Check,
-  Copy,
-  Layers,
-  Sliders,
-  CheckCircle2,
-  AlertCircle,
-  ExternalLink,
-  Film,
-  Maximize2,
-  Minimize2,
-} from "lucide-react";
+import { Film, Loader2, CheckCircle2, AlertCircle, Download } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+
+// Import modular components
+import SVGEditor from "@/components/video-converter/SVGEditor";
+import VideoPreview from "@/components/video-converter/VideoPreview";
+import RenderSettings from "@/components/video-converter/RenderSettings";
+import MarketplaceSEOKit from "@/components/video-converter/MarketplaceSEOKit";
+import FullscreenModal from "@/components/video-converter/FullscreenModal";
 
 const SVG_PRESETS = [
   {
@@ -613,29 +590,26 @@ export default function VideoConverterPage() {
               onClick={handleExport}
               disabled={isExporting}
               size="default"
-              className="bg-[#5bb75b] hover:bg-[#449d44] text-white font-semibold shadow-sm border-0 rounded-[4px] transition-all duration-150 active:scale-95 disabled:opacity-50 text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5"
+              className="bg-[#5bb75b] hover:bg-[#449d44] text-white font-semibold shadow-sm border-0 rounded-[4px] transition-all duration-150 active:scale-95 disabled:opacity-50 text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 cursor-pointer"
             >
               {isExporting ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin mr-1.5 sm:mr-2" />
-                  Generating ({progressState?.progress || 0}%)
+                  Rendering...
                 </>
               ) : (
-                <>
-                  <Video className="h-4 w-4 mr-1.5 sm:mr-2" />
-                  Convert to MP4
-                </>
+                "Export Video"
               )}
             </Button>
           </div>
         </div>
       </header>
 
-      {/* Mobile Tab Switcher */}
-      <div className="lg:hidden flex border-b border-[#ced4da] bg-white sticky top-[65px] z-30 p-2 gap-2 shadow-sm">
+      {/* Sticky Mobile Tab Selector */}
+      <div className="lg:hidden bg-white border-b border-[#ced4da] p-2 flex gap-2 sticky top-[53px] sm:top-[65px] z-30 shadow-sm">
         <button
           onClick={() => setActiveMobileTab('editor')}
-          className={`flex-1 py-2 text-center text-xs sm:text-sm font-semibold rounded-[4px] border transition-all ${
+          className={`flex-1 py-2 text-center text-xs sm:text-sm font-semibold rounded-[4px] border transition-all cursor-pointer ${
             activeMobileTab === 'editor'
               ? 'bg-[#5bb75b] border-[#5bb75b] text-white'
               : 'bg-white border-[#ced4da] text-slate-700 hover:bg-slate-50'
@@ -645,7 +619,7 @@ export default function VideoConverterPage() {
         </button>
         <button
           onClick={() => setActiveMobileTab('preview')}
-          className={`flex-1 py-2 text-center text-xs sm:text-sm font-semibold rounded-[4px] border transition-all ${
+          className={`flex-1 py-2 text-center text-xs sm:text-sm font-semibold rounded-[4px] border transition-all cursor-pointer ${
             activeMobileTab === 'preview'
               ? 'bg-[#5bb75b] border-[#5bb75b] text-white'
               : 'bg-white border-[#ced4da] text-slate-700 hover:bg-slate-50'
@@ -659,298 +633,67 @@ export default function VideoConverterPage() {
       <main className="flex-1 max-w-full w-full mx-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Column: Code Editor & Presets (7 cols) */}
         <section className={cn("lg:col-span-7 flex flex-col gap-4 w-full", activeMobileTab !== 'editor' && "hidden lg:flex")}>
-          <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-3 rounded-[4px] border border-[#ced4da] shadow-sm">
-            <div className="flex items-center gap-2">
-              <Code2 className="h-4 w-4 text-[#5bb75b]" />
-              <span className="text-sm font-semibold text-[#2e2e2e] font-sans">SVG Code Editor</span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              {/* Presets dropdown */}
-              <Select
-                onValueChange={(val) => {
-                  const preset = SVG_PRESETS.find((p) => p.name === val);
-                  if (preset) {
-                    setSvgCode(preset.code);
-                    setActivePresetName(preset.name);
-                    const defaultMeta = DEFAULT_PRESET_METADATA[preset.name];
-                    if (defaultMeta) {
-                      setMetadataTitle(defaultMeta.title);
-                      setMetadataKeywords(defaultMeta.keywords);
-                    }
-                    toast.info(`Loaded "${preset.name}" preset`);
-                  }
-                }}
-              >
-                <SelectTrigger className="h-10 px-3 text-sm bg-white border-[#ced4da] w-[170px] text-[#2e2e2e] rounded-[4px] hover:border-[#5bb75b] focus:ring-1 focus:ring-[#5bb75b]">
-                  <SelectValue placeholder="✨ Load Preset" />
-                </SelectTrigger>
-                <SelectContent className="bg-white border-[#ced4da] text-[#2e2e2e]">
-                  {SVG_PRESETS.map((preset) => (
-                    <SelectItem key={preset.name} value={preset.name} className="text-xs focus:bg-[#f8f9fa] focus:text-[#5bb75b]">
-                      {preset.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              {/* Upload SVG */}
-              <input
-                type="file"
-                accept=".svg"
-                id="svg-upload-input"
-                className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (!file) return;
-                  const reader = new FileReader();
-                  reader.onload = (event) => {
-                    if (event.target?.result) {
-                      setSvgCode(event.target.result as string);
-                      toast.success("Uploaded SVG file successfully!");
-                    }
-                  };
-                  reader.readAsText(file);
-                  e.target.value = "";
-                }}
-              />
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8 text-xs bg-white border-[#ced4da] hover:bg-[#f8f9fa] hover:text-[#2e2e2e] text-[#2e2e2e] rounded-[4px] transition-all"
-                onClick={() => document.getElementById("svg-upload-input")?.click()}
-              >
-                <UploadCloud className="h-3.5 w-3.5 mr-1 text-[#6c757d]" />
-                Upload .SVG
-              </Button>
-
-              {/* Copy Code */}
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 px-2 text-xs text-[#6c757d] hover:text-[#2e2e2e] hover:bg-slate-100 rounded-[3px]"
-                onClick={handleCopyCode}
-              >
-                {copied ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
-              </Button>
-            </div>
-          </div>
-
-          {/* Monaco Editor Container */}
-          <div className="flex-1 min-h-[500px] rounded-[4px] border border-[#ced4da] overflow-hidden shadow-sm bg-[#1e1e1e] flex flex-col hover:shadow-1 transition-all">
-            <Editor
-              height="100%"
-              defaultLanguage="xml"
-              theme="vs-dark"
-              value={svgCode}
-              onChange={(value) => {
-                if (value) {
-                  setSvgCode(value);
-                  const preset = SVG_PRESETS.find((p) => p.code === value);
-                  if (preset) {
-                    setActivePresetName(preset.name);
-                  } else {
-                    setActivePresetName("Custom SVG");
-                  }
-                } else {
-                  setSvgCode("");
-                  setActivePresetName("Custom SVG");
+          <SVGEditor
+            svgCode={svgCode}
+            onChange={(val) => {
+              setSvgCode(val);
+              const matchingPreset = SVG_PRESETS.find((p) => p.code === val);
+              if (matchingPreset) {
+                setActivePresetName(matchingPreset.name);
+              } else {
+                setActivePresetName("Custom SVG");
+              }
+            }}
+            presets={SVG_PRESETS}
+            activePresetName={activePresetName}
+            onPresetChange={(val) => {
+              const preset = SVG_PRESETS.find((p) => p.name === val);
+              if (preset) {
+                setSvgCode(preset.code);
+                setActivePresetName(preset.name);
+                const defaultMeta = DEFAULT_PRESET_METADATA[preset.name];
+                if (defaultMeta) {
+                  setMetadataTitle(defaultMeta.title);
+                  setMetadataKeywords(defaultMeta.keywords);
                 }
-              }}
-              options={{
-                minimap: { enabled: false },
-                fontSize: 13,
-                wordWrap: "on",
-                formatOnPaste: true,
-                automaticLayout: true,
-                padding: { top: 12, bottom: 12 },
-              }}
-            />
-          </div>
+                toast.info(`Loaded "${preset.name}" preset`);
+              }
+            }}
+            copied={copied}
+            onCopyCode={handleCopyCode}
+            onUploadSVG={(code) => {
+              setSvgCode(code);
+              const matchingPreset = SVG_PRESETS.find((p) => p.code === code);
+              if (matchingPreset) {
+                setActivePresetName(matchingPreset.name);
+              } else {
+                setActivePresetName("Custom SVG");
+              }
+            }}
+          />
         </section>
 
         {/* Right Column: Live Preview, Settings & Render Progress (5 cols) */}
         <section className={cn("lg:col-span-5 flex flex-col gap-6 w-full", activeMobileTab !== 'preview' && "hidden lg:flex")}>
-          {/* Live SVG Preview */}
-          <div className="rounded-[4px] border border-[#ced4da] bg-white overflow-hidden shadow-sm flex flex-col">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-[#ced4da] bg-[#f8f9fa]">
-              <div className="flex items-center gap-2">
-                <Play className="h-4 w-4 text-[#5bb75b]" />
-                <span className="text-sm font-semibold text-[#2e2e2e] font-sans">Live Preview</span>
-              </div>
+          <VideoPreview
+            svgCode={svgCode}
+            bgPattern={bgPattern}
+            setBgPattern={setBgPattern}
+            previewKey={previewKey}
+            onRestartPreview={() => setPreviewKey((k) => k + 1)}
+            onFullscreenTrigger={() => setIsFullscreenPreview(true)}
+          />
 
-              <div className="flex items-center gap-2">
-                {/* Background Pattern Switcher */}
-                <div className="flex bg-slate-100 rounded-[3px] p-0.5 border border-[#ced4da]">
-                  <button
-                    onClick={() => setBgPattern("dark")}
-                    className={`px-2 py-0.5 text-[11px] rounded-[3px] transition-all ${bgPattern === "dark" ? "bg-[#5bb75b] text-white font-medium shadow-sm" : "text-slate-500 hover:text-[#2e2e2e]"
-                      }`}
-                  >
-                    Dark
-                  </button>
-                  <button
-                    onClick={() => setBgPattern("checker")}
-                    className={`px-2 py-0.5 text-[11px] rounded-[3px] transition-all ${bgPattern === "checker" ? "bg-[#5bb75b] text-white font-medium shadow-sm" : "text-slate-500 hover:text-[#2e2e2e]"
-                      }`}
-                  >
-                    Grid
-                  </button>
-                  <button
-                    onClick={() => setBgPattern("light")}
-                    className={`px-2 py-0.5 text-[11px] rounded-[3px] transition-all ${bgPattern === "light" ? "bg-[#5bb75b] text-white font-medium shadow-sm" : "text-slate-500 hover:text-[#2e2e2e]"
-                      }`}
-                  >
-                    Light
-                  </button>
-                </div>
-
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 text-[#6c757d] hover:text-[#2e2e2e] hover:bg-slate-200 rounded-[3px]"
-                  onClick={() => setPreviewKey((k) => k + 1)}
-                  title="Restart Preview Animation"
-                >
-                  <RotateCcw className="h-3.5 w-3.5" />
-                </Button>
-
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 text-[#6c757d] hover:text-[#2e2e2e] hover:bg-slate-200 rounded-[3px]"
-                  onClick={() => setIsFullscreenPreview(true)}
-                  title="Fullscreen Preview"
-                >
-                  <Maximize2 className="h-3.5 w-3.5" />
-                </Button>
-              </div>
-            </div>
-
-            {/* Preview Frame */}
-            <div
-              className={`h-[280px] p-4 flex items-center justify-center relative overflow-hidden transition-all ${bgPattern === "checker"
-                  ? "bg-slate-900"
-                  : bgPattern === "light"
-                    ? "bg-slate-200"
-                    : "bg-black"
-                }`}
-              style={
-                bgPattern === "checker"
-                  ? {
-                    backgroundImage:
-                      "radial-gradient(circle, #334155 1px, transparent 1px)",
-                    backgroundSize: "16px 16px",
-                  }
-                  : undefined
-              }
-            >
-              <div
-                key={previewKey}
-                className="w-full h-full flex items-center justify-center [&>svg]:max-w-full [&>svg]:max-h-full [&>svg]:w-auto [&>svg]:h-auto transition-all"
-                dangerouslySetInnerHTML={{ __html: svgCode }}
-              />
-            </div>
-          </div>
-
-          {/* Export Settings Card */}
-          <div className="rounded-[4px] border border-[#ced4da] bg-white p-5 shadow-sm flex flex-col gap-4">
-            <div className="flex items-center gap-2 border-b border-[#ced4da] pb-3">
-              <Sliders className="h-4 w-4 text-[#5bb75b]" />
-              <h2 className="text-sm font-semibold text-[#2e2e2e] font-sans">Export Specifications</h2>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Resolution */}
-              <div className="space-y-1.5">
-                <Label className="text-xs text-[#6c757d] font-sans">Resolution</Label>
-                <Select value={resolution} onValueChange={(val) => val && setResolution(val)}>
-                  <SelectTrigger className="w-full h-10 px-3 bg-white border-[#ced4da] text-[#2e2e2e] text-sm rounded-[4px] hover:border-[#5bb75b] focus:ring-1 focus:ring-[#5bb75b] focus-visible:border-[#5bb75b]">
-                    <SelectValue placeholder="Resolution" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-white border-[#ced4da] text-[#2e2e2e]">
-                    <SelectItem value="3840x2160">4K Ultra HD (3840x2160) - Best</SelectItem>
-                    <SelectItem value="1920x1080">Full HD 1080p (1920x1080)</SelectItem>
-                    <SelectItem value="1280x720">HD 720p (1280x720)</SelectItem>
-                    <SelectItem value="1080x1080">1:1 Square (1080x1080)</SelectItem>
-                    <SelectItem value="1080x1920">9:16 Vertical Story (1080x1920)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Frame Rate */}
-              <div className="space-y-1.5">
-                <Label className="text-xs text-[#6c757d] font-sans">Frame Rate</Label>
-                <Select value={fps} onValueChange={(val) => val && setFps(val)}>
-                  <SelectTrigger className="w-full h-10 px-3 bg-white border-[#ced4da] text-[#2e2e2e] text-sm rounded-[4px] hover:border-[#5bb75b] focus:ring-1 focus:ring-[#5bb75b] focus-visible:border-[#5bb75b]">
-                    <SelectValue placeholder="FPS" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-white border-[#ced4da] text-[#2e2e2e]">
-                    <SelectItem value="24">24 FPS (Cinematic)</SelectItem>
-                    <SelectItem value="30">30 FPS (Standard Video)</SelectItem>
-                    <SelectItem value="60">60 FPS (Ultra Smooth)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Video Codec */}
-              <div className="sm:col-span-2 space-y-1.5">
-                <Label className="text-xs text-[#6c757d] font-sans">Video Codec</Label>
-                <Select value={codec} onValueChange={(val) => val && setCodec(val as any)}>
-                  <SelectTrigger className="w-full h-10 px-3 bg-white border-[#ced4da] text-[#2e2e2e] text-sm rounded-[4px] hover:border-[#5bb75b] focus:ring-1 focus:ring-[#5bb75b] focus-visible:border-[#5bb75b]">
-                    <SelectValue placeholder="Codec" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-white border-[#ced4da] text-[#2e2e2e]">
-                    <SelectItem value="h264">H.264 (MP4) - Web & Mobile Friendly</SelectItem>
-                    <SelectItem value="prores">Apple ProRes 422 HQ (MOV) - Best for Adobe Stock</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Duration Slider */}
-              <div className="sm:col-span-2 space-y-2 pt-1">
-                <div className="flex items-center justify-between text-xs text-[#6c757d]">
-                  <span className="font-sans">Duration: <strong className="text-[#2e2e2e] text-sm font-semibold">{duration}s</strong></span>
-                  <div className="flex gap-1">
-                    {[5, 10, 15, 30].map((sec) => (
-                      <button
-                        key={sec}
-                        onClick={() => setDuration(sec.toString())}
-                        className={`px-2 py-0.5 rounded-[3px] text-[11px] border transition-colors ${duration === sec.toString()
-                            ? "bg-[#5bb75b] border-[#5bb75b] text-white font-medium shadow-sm"
-                            : "bg-white border-slate-300 text-slate-700 hover:border-slate-400 hover:bg-slate-50"
-                          }`}
-                      >
-                        {sec}s
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <input
-                    type="range"
-                    min="5"
-                    max="60"
-                    value={duration}
-                    onChange={(e) => setDuration(e.target.value)}
-                    className="flex-1 accent-[#5bb75b] cursor-pointer bg-slate-200 h-1.5 rounded-lg appearance-none"
-                  />
-                  <Input
-                    type="number"
-                    min="5"
-                    max="60"
-                    value={duration}
-                    onChange={(e) => setDuration(e.target.value)}
-                    className="w-16 h-8 text-xs bg-white border-[#ced4da] text-center text-[#2e2e2e] rounded-[3px] focus:border-[#5bb75b] focus:ring-[#5bb75b]"
-                  />
-                </div>
-                <p className="text-[11px] text-[#6c757d] font-sans">
-                  Adobe Stock / Shutterstock standard length requirement: 5s – 60s.
-                </p>
-              </div>
-            </div>
-          </div>
+          <RenderSettings
+            resolution={resolution}
+            setResolution={setResolution}
+            fps={fps}
+            setFps={setFps}
+            codec={codec}
+            setCodec={setCodec}
+            duration={duration}
+            setDuration={setDuration}
+          />
 
           {/* Render Progress Card (Shown when exporting) */}
           {isExporting && (
@@ -995,7 +738,7 @@ export default function VideoConverterPage() {
                 <a
                   href={generatedVideoUrl}
                   download={videoDetails?.codec === "prores" ? "stock-video-prores.mov" : "stock-video.mp4"}
-                  className="inline-flex items-center justify-center h-8 px-4 rounded-[4px] bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs shadow-sm transition-all active:scale-95"
+                  className="inline-flex items-center justify-center h-8 px-4 rounded-[4px] bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs shadow-sm transition-all active:scale-95 cursor-pointer"
                 >
                   <Download className="h-3.5 w-3.5 mr-1.5" />
                   Download {videoDetails?.codec === "prores" ? "ProRes MOV" : "MP4"}
@@ -1049,236 +792,28 @@ export default function VideoConverterPage() {
 
           {/* Marketplace SEO Kit Card */}
           {generatedVideoUrl && !isExporting && (
-            <div className="rounded-[4px] border border-[#ced4da] bg-white p-5 shadow-sm flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
-              <div className="flex items-center justify-between border-b border-[#ced4da] pb-3">
-                <div className="flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-[#5bb75b]" />
-                  <h2 className="text-sm font-semibold text-[#2e2e2e] font-sans">Marketplace SEO Kit</h2>
-                </div>
-                <Button
-                  onClick={handleGenerateAIMetadata}
-                  disabled={isGeneratingMetadata}
-                  size="sm"
-                  className="bg-[#5bb75b] hover:bg-[#449d44] text-white text-xs font-semibold rounded-[4px] h-8 px-3 transition-all active:scale-95 border-0 shadow-sm"
-                >
-                  {isGeneratingMetadata ? (
-                    <>
-                      <Loader2 className="h-3 w-3 animate-spin mr-1.5" />
-                      Optimizing...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="h-3 w-3 mr-1.5" />
-                      Enhance with Gemini AI
-                    </>
-                  )}
-                </Button>
-              </div>
-
-              {/* Title Generator Field */}
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <Label className="text-xs text-[#6c757d] font-sans">Stock Video Title</Label>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 text-[10px] text-[#6c757d] hover:text-[#2e2e2e] p-1 gap-1"
-                    onClick={() => {
-                      navigator.clipboard.writeText(metadataTitle);
-                      toast.success("Copied title to clipboard!");
-                    }}
-                  >
-                    <Copy className="h-3 w-3" />
-                    Copy Title
-                  </Button>
-                </div>
-                <Input
-                  value={metadataTitle}
-                  onChange={(e) => setMetadataTitle(e.target.value)}
-                  className="w-full h-10 px-3 bg-[#f8f9fa] border-[#ced4da] text-[#2e2e2e] text-xs font-sans rounded-[4px]"
-                  placeholder="Generating title..."
-                />
-              </div>
-
-              {/* Keywords Tag Cloud Field */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label className="text-xs text-[#6c757d] font-sans">Search Tags / Keywords ({metadataKeywords.split(",").filter(Boolean).length})</Label>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 text-[10px] text-[#6c757d] hover:text-[#2e2e2e] p-1 gap-1"
-                    onClick={() => {
-                      navigator.clipboard.writeText(metadataKeywords);
-                      toast.success("Copied keywords to clipboard!");
-                    }}
-                  >
-                    <Copy className="h-3 w-3" />
-                    Copy Tags
-                  </Button>
-                </div>
-                
-                {/* Visual badges container */}
-                <div className="flex flex-wrap gap-1.5 p-3 bg-[#f8f9fa] border border-[#ced4da] rounded-[4px] max-h-[160px] overflow-y-auto w-full">
-                  {metadataKeywords.split(",").filter(Boolean).map((tag, idx) => (
-                    <span
-                      key={idx}
-                      className="inline-flex items-center text-[10px] px-2 py-0.5 rounded-[3px] bg-white border border-[#ced4da] text-slate-700 font-sans shadow-sm"
-                    >
-                      {tag.trim()}
-                    </span>
-                  ))}
-                  {metadataKeywords.split(",").filter(Boolean).length === 0 && (
-                    <span className="text-xs text-[#6c757d] italic font-sans">No tags generated yet.</span>
-                  )}
-                </div>
-              </div>
-
-              {/* CSV Export Option */}
-              <div className="flex items-center justify-between bg-slate-50 border border-slate-200 p-3 rounded-[4px] mt-1.5">
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-[11px] font-bold text-[#2e2e2e] font-sans">Bulk Metadata CSV Export</span>
-                  <span className="text-[9px] text-[#6c757d] font-sans font-normal">Perfect for uploading multiple files to stock agency dashboards.</span>
-                </div>
-                <div className="flex gap-2 shrink-0">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-8 text-xs border-[#ced4da] bg-white hover:bg-slate-50 text-[#2e2e2e] rounded-[4px] shadow-sm font-semibold transition-all active:scale-95"
-                    onClick={() => {
-                      const txtContent = `TITLE:\n${metadataTitle}\n\nKEYWORDS:\n${metadataKeywords}`;
-                      const encodedUri = "data:text/plain;charset=utf-8," + encodeURIComponent(txtContent);
-                      const link = document.createElement("a");
-                      link.setAttribute("href", encodedUri);
-                      link.setAttribute("download", "metadata.txt");
-                      document.body.appendChild(link);
-                      link.click();
-                      document.body.removeChild(link);
-                      toast.success("Downloaded TXT metadata file!");
-                    }}
-                  >
-                    Export TXT
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-8 text-xs border-[#ced4da] bg-white hover:bg-slate-50 text-[#2e2e2e] rounded-[4px] shadow-sm font-semibold transition-all active:scale-95"
-                    onClick={() => {
-                      const csvContent = "data:text/csv;charset=utf-8," 
-                        + ["Filename", "Title", "Keywords", "Category"].join(",") + "\n"
-                        + [
-                            videoDetails?.codec === "prores" ? "stock-video-prores.mov" : "stock-video.mp4",
-                            `"${metadataTitle.replace(/"/g, '""')}"`,
-                            `"${metadataKeywords.replace(/"/g, '""')}"`,
-                            "Abstract"
-                          ].join(",");
-                      const encodedUri = encodeURI(csvContent);
-                      const link = document.createElement("a");
-                      link.setAttribute("href", encodedUri);
-                      link.setAttribute("download", "marketplace-metadata.csv");
-                      document.body.appendChild(link);
-                      link.click();
-                      document.body.removeChild(link);
-                      toast.success("Downloaded CSV metadata spreadsheet!");
-                    }}
-                  >
-                    Export CSV
-                  </Button>
-                </div>
-              </div>
-            </div>
+            <MarketplaceSEOKit
+              metadataTitle={metadataTitle}
+              setMetadataTitle={setMetadataTitle}
+              metadataKeywords={metadataKeywords}
+              setMetadataKeywords={setMetadataKeywords}
+              isGeneratingMetadata={isGeneratingMetadata}
+              onGenerateAIMetadata={handleGenerateAIMetadata}
+              videoDetails={videoDetails}
+            />
           )}
         </section>
       </main>
 
       {/* Fullscreen SVG Preview Modal */}
       {isFullscreenPreview && (
-        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex flex-col animate-in fade-in duration-200">
-          {/* Header Bar */}
-          <div className="flex items-center justify-between p-4 border-b border-white/10 bg-slate-900/80 text-white">
-            <span className="text-sm font-semibold font-sans">Fullscreen SVG Preview</span>
-
-            <div className="flex items-center gap-3">
-              {/* Background Pattern Switcher */}
-              <div className="flex bg-slate-800 rounded-[3px] p-0.5 border border-white/10">
-                <button
-                  onClick={() => setBgPattern("dark")}
-                  className={`px-2.5 py-1 text-[11px] rounded-[3px] transition-all ${
-                    bgPattern === "dark" ? "bg-[#5bb75b] text-white font-medium shadow-sm" : "text-slate-400 hover:text-white"
-                  }`}
-                >
-                  Dark
-                </button>
-                <button
-                  onClick={() => setBgPattern("checker")}
-                  className={`px-2.5 py-1 text-[11px] rounded-[3px] transition-all ${
-                    bgPattern === "checker" ? "bg-[#5bb75b] text-white font-medium shadow-sm" : "text-slate-400 hover:text-white"
-                  }`}
-                >
-                  Grid
-                </button>
-                <button
-                  onClick={() => setBgPattern("light")}
-                  className={`px-2.5 py-1 text-[11px] rounded-[3px] transition-all ${
-                    bgPattern === "light" ? "bg-[#5bb75b] text-white font-medium shadow-sm" : "text-slate-400 hover:text-white"
-                  }`}
-                >
-                  Light
-                </button>
-              </div>
-
-              {/* Restart Preview */}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-slate-400 hover:text-white hover:bg-slate-800 rounded-[3px]"
-                onClick={() => setPreviewKey((k) => k + 1)}
-                title="Restart Animation"
-              >
-                <RotateCcw className="h-4 w-4" />
-              </Button>
-
-              {/* Close Button */}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-slate-400 hover:text-white hover:bg-slate-800 rounded-[3px]"
-                onClick={() => setIsFullscreenPreview(false)}
-                title="Exit Fullscreen"
-              >
-                <Minimize2 className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-
-          {/* Fullscreen Frame */}
-          <div
-            className={`flex-1 flex items-center justify-center p-6 sm:p-12 relative overflow-hidden transition-all ${
-              bgPattern === "checker"
-                ? "bg-slate-900"
-                : bgPattern === "light"
-                ? "bg-slate-200"
-                : "bg-black"
-            }`}
-            style={
-              bgPattern === "checker"
-                ? {
-                    backgroundImage:
-                      "radial-gradient(circle, #334155 1.5px, transparent 1.5px)",
-                    backgroundSize: "24px 24px",
-                  }
-                : undefined
-            }
-          >
-            <div
-              key={`fs-${previewKey}`}
-              className="w-full h-full max-w-[90vw] max-h-[80vh] flex items-center justify-center [&>svg]:max-w-full [&>svg]:max-h-full [&>svg]:w-auto [&>svg]:h-auto transition-all"
-              dangerouslySetInnerHTML={{ __html: svgCode }}
-            />
-          </div>
-        </div>
+        <FullscreenModal
+          svgCode={svgCode}
+          bgPattern={bgPattern}
+          setBgPattern={setBgPattern}
+          onClose={() => setIsFullscreenPreview(false)}
+        />
       )}
     </div>
   );
 }
-

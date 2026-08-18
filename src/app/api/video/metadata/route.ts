@@ -6,6 +6,7 @@ export async function POST(request: NextRequest) {
 
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
+      console.error("[API Error] GEMINI_API_KEY is missing from process.env. Keys available:", Object.keys(process.env));
       return NextResponse.json(
         { error: "GEMINI_API_KEY is not configured on the server." },
         { status: 500 }
@@ -32,7 +33,7 @@ Example JSON Response:
 Do not wrap your response in markdown code blocks like \`\`\`json. Return ONLY the raw JSON string.`;
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
       {
         method: "POST",
         headers: {
