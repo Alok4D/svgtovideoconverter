@@ -27,28 +27,28 @@ RUN npm install -g pnpm
 
 WORKDIR /app
 
-# Create user with UID 1000 (standard for Hugging Face Spaces)
-RUN useradd -m -u 1000 user
-RUN mkdir -p /app/uploads && chown -R user:user /app
+# Ensure uploads folder exists and is owned by the node user
+RUN mkdir -p /app/uploads && chown -R node:node /app
 
-# Switch to the non-root user
-USER user
+# Switch to the non-root node user (which already has UID 1000)
+USER node
 
 # Copy package files first for caching
-COPY --chown=user:user package.json pnpm-lock.yaml* ./
+COPY --chown=node:node package.json pnpm-lock.yaml* ./
 
 # Install dependencies
 RUN pnpm install
 
 # Copy all source files
-COPY --chown=user:user . .
+COPY --chown=node:node . .
 
 # Build Next.js application
 RUN pnpm run build
 
-# Expose port 7860 (Hugging Face Spaces default)
-ENV PORT=7860
+# Expose port (Hugging Face uses 7860, Render uses 10000/3000)
 EXPOSE 7860
+EXPOSE 10000
+EXPOSE 3000
 
 # Start server
 CMD ["pnpm", "run", "prod"]
