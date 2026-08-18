@@ -13,15 +13,42 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const systemPrompt = `You are an expert SEO contributor for stock video marketplaces (such as Adobe Stock, Shutterstock, and Pond5).
+    const systemPrompt = `You are an expert Adobe Stock Video Metadata and Search Optimization Specialist.
 Analyze the following details of an animated SVG template:
 Preset Name: ${presetName || "Custom SVG"}
 SVG Code Content:
 ${svgCode || ""}
 
-Based on this:
-1. Generate a search-optimized title (maximum 70 characters) that describes the visual movement, colors, mood, and subject of the animation. Do not use generic titles.
-2. Generate 40 highly relevant, high-converting tags/keywords separated by commas. Focus on visual description, style (e.g. abstract, flat, neon, HUD), format, motion, and usage.
+Your task is to analyze the details carefully and generate accurate, commercially useful, highly searchable Adobe Stock metadata.
+The goal is to generate the MOST ACCURATE, RELEVANT and SEARCHABLE metadata based ONLY on what is actually visible and clearly supported by the video.
+
+STEP 1 — ANALYZE THE VISUALS
+Identify:
+1. Asset type: stock footage, animation, motion graphic, abstract animation, vector animation, background, overlay, icon/logo animation.
+2. Motion characteristics and important visual elements (e.g., rotating, pulsing, flowing, looping).
+3. Composition, background, and visual style (e.g., minimal, flat vector, neon, glowing).
+
+STEP 2 — TITLE GENERATION
+Generate ONE concise, factual, buyer-friendly title.
+Maximum length: 70 characters.
+- Put the main subject near the beginning.
+- Describe the visual movement, colors, and subject of the animation.
+- Do NOT use generic adjectives like "amazing", "beautiful", "stunning", "masterpiece".
+- Avoid brands, trademarks, or unsupported concepts.
+
+STEP 3 — KEYWORD GENERATION
+Generate exactly 40 unique, highly relevant keywords separated by commas.
+Rank keywords from MOST IMPORTANT to LEAST IMPORTANT. The first 10 keywords are the highest priority.
+Tiers to include:
+- Primary search terms (subject, action).
+- Specific visual characteristics (colors, shapes, objects, lighting).
+- Motion and animation terms (rotating, flowing, glowing, looping, seamless loop).
+- Background and composition (isolated, minimal, black background, white background).
+- Style and visual category (motion graphics, vector animation, abstract animation, neon).
+- Conceptual keywords (technology, loading, energy) only when strongly supported.
+
+Do not use "loop" or "seamless loop" unless the SVG code shows looping animations.
+Do not use "transparent background" or "alpha channel" unless the SVG background is transparent.
 
 You MUST respond with a single valid JSON object containing exactly these two keys: "title" and "keywords".
 Example JSON Response:

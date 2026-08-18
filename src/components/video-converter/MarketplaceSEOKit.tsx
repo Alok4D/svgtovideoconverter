@@ -123,12 +123,18 @@ export default function MarketplaceSEOKit({
             Copy Title
           </Button>
         </div>
-        <Input
-          value={metadataTitle}
-          onChange={(e) => setMetadataTitle(e.target.value)}
-          className="w-full h-10 px-3 bg-[#f8f9fa] border-[#ced4da] text-[#2e2e2e] text-xs font-sans rounded-[4px]"
-          placeholder="Generating title..."
-        />
+        {isGeneratingMetadata ? (
+          <div className="w-full h-10 bg-slate-100 rounded-[4px] border border-[#ced4da] flex items-center px-3 animate-pulse">
+            <div className="h-3 w-[70%] bg-slate-200 rounded-[3px]" />
+          </div>
+        ) : (
+          <Input
+            value={metadataTitle}
+            onChange={(e) => setMetadataTitle(e.target.value)}
+            className="w-full h-10 px-3 bg-[#f8f9fa] border-[#ced4da] text-[#2e2e2e] text-xs font-sans rounded-[4px]"
+            placeholder="Generating title..."
+          />
+        )}
       </div>
 
       {/* Keywords Tag Cloud Field */}
@@ -142,28 +148,40 @@ export default function MarketplaceSEOKit({
             size="sm"
             className="h-6 text-[10px] text-[#6c757d] hover:text-[#2e2e2e] p-1 gap-1 cursor-pointer"
             onClick={handleCopyKeywords}
+            disabled={isGeneratingMetadata}
           >
             <Copy className="h-3 w-3" />
             Copy Tags
           </Button>
         </div>
 
-        {/* Visual badges container */}
-        <div className="flex flex-wrap gap-1.5 p-3 bg-[#f8f9fa] border border-[#ced4da] rounded-[4px] max-h-[160px] overflow-y-auto w-full">
-          {metadataKeywords.split(",").filter(Boolean).map((tag, idx) => (
-            <span
-              key={idx}
-              className="inline-flex items-center text-[10px] px-2 py-0.5 rounded-[3px] bg-white border border-[#ced4da] text-slate-700 font-sans shadow-sm"
-            >
-              {tag.trim()}
-            </span>
-          ))}
-          {keywordCount === 0 && (
-            <span className="text-xs text-[#6c757d] italic font-sans">
-              No tags generated yet.
-            </span>
-          )}
-        </div>
+        {isGeneratingMetadata ? (
+          <div className="flex flex-wrap gap-1.5 p-3 bg-[#f8f9fa] border border-[#ced4da] rounded-[4px] min-h-[120px] max-h-[160px] overflow-hidden w-full items-start content-start animate-pulse">
+            {[...Array(15)].map((_, i) => (
+              <div 
+                key={i} 
+                className="h-6 bg-slate-200 rounded-[3px]" 
+                style={{ width: `${45 + (i % 6) * 12}px` }} 
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-wrap gap-1.5 p-3 bg-[#f8f9fa] border border-[#ced4da] rounded-[4px] max-h-[160px] overflow-y-auto w-full">
+            {metadataKeywords.split(",").filter(Boolean).map((tag, idx) => (
+              <span
+                key={idx}
+                className="inline-flex items-center text-[10px] px-2 py-0.5 rounded-[3px] bg-white border border-[#ced4da] text-slate-700 font-sans shadow-sm"
+              >
+                {tag.trim()}
+              </span>
+            ))}
+            {keywordCount === 0 && (
+              <span className="text-xs text-[#6c757d] italic font-sans">
+                No tags generated yet.
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
       {/* CSV/TXT Export Options */}
