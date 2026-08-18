@@ -4,7 +4,7 @@ import { addVideoJob } from '@/lib/video/video.queue';
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { svgCode, fps = 30, duration = 5, width = 1920, height = 1080 } = body;
+    const { svgCode, fps = 30, duration = 5, width = 1920, height = 1080, codec = 'h264' } = body;
 
     if (!svgCode || typeof svgCode !== 'string' || !svgCode.trim()) {
       return NextResponse.json({ success: false, message: 'SVG code is required' }, { status: 400 });
@@ -25,6 +25,7 @@ export async function POST(req: Request) {
       duration: parsedDuration,
       width: parsedWidth,
       height: parsedHeight,
+      codec: codec === 'prores' ? 'prores' : 'h264',
     });
 
     return NextResponse.json({ 

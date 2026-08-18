@@ -8,6 +8,7 @@ export interface VideoJobData {
   duration: number;
   width: number;
   height: number;
+  codec?: 'h264' | 'prores';
 }
 
 export interface VideoJobResult {
@@ -17,6 +18,7 @@ export interface VideoJobResult {
   width?: number;
   height?: number;
   fileSize?: string;
+  codec?: 'h264' | 'prores';
 }
 
 export interface VideoJob {

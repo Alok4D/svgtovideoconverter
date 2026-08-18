@@ -35,9 +35,9 @@ async function getOrBuildBundle(): Promise<string> {
 }
 
 export async function processVideoRender(job: VideoJob): Promise<VideoJobResult> {
-  const { svgCode, fps = 30, duration = 5, width = 1920, height = 1080 } = job.data;
+  const { svgCode, fps = 30, duration = 5, width = 1920, height = 1080, codec = 'h264' } = job.data;
   
-  console.log(`[Job ${job.id}] Starting SVG to MP4 render: ${width}x${height} @ ${fps}fps, ${duration}s`);
+  console.log(`[Job ${job.id}] Starting SVG to ${codec.toUpperCase()} render: ${width}x${height} @ ${fps}fps, ${duration}s`);
   await job.updateProgress(10, 'Preparing Remotion renderer...');
 
   const compositionId = 'SvgVideo';
@@ -48,7 +48,8 @@ export async function processVideoRender(job: VideoJob): Promise<VideoJobResult>
     fs.mkdirSync(outDir, { recursive: true });
   }
 
-  const outputLocation = path.join(outDir, `video-${job.id}.mp4`);
+  const fileExt = codec === 'prores' ? 'mov' : 'mp4';
+  const outputLocation = path.join(outDir, `video-${job.id}.${fileExt}`);
   const durationInFrames = Math.max(1, Math.round(duration * fps));
 
   try {
@@ -74,7 +75,9 @@ export async function processVideoRender(job: VideoJob): Promise<VideoJobResult>
     await renderMedia({
       composition,
       serveUrl: bundleLocation,
-      codec: 'h264',
+      codec: codec === 'prores' ? 'prores' : 'h264',
+      pixelFormat: codec === 'prores' ? 'yuv422p10le' : 'yuv420p',
+      crf: codec === 'prores' ? undefined : 16,
       outputLocation,
       inputProps: {
         svgCode,
@@ -85,8 +88,6 @@ export async function processVideoRender(job: VideoJob): Promise<VideoJobResult>
       },
       frameRange: [0, durationInFrames - 1],
       imageFormat: 'png',
-      crf: 16,
-      pixelFormat: 'yuv420p',
       onProgress: ({ progress }) => {
         // Map remotion progress (0.0 to 1.0) to (40% to 95%)
         const currentProgress = 40 + Math.floor(progress * 55);
@@ -95,7 +96,7 @@ export async function processVideoRender(job: VideoJob): Promise<VideoJobResult>
       },
     });
 
-    await job.updateProgress(95, 'Finalizing MP4 file...');
+    await job.updateProgress(95, `Finalizing ${fileExt.toUpperCase()} file...`);
 
     // Calculate file size
     let formattedSize = '';
@@ -116,9 +117,19 @@ export async function processVideoRender(job: VideoJob): Promise<VideoJobResult>
       width,
       height,
       fileSize: formattedSize,
+      codec,
     };
   } catch (error: any) {
     console.error(`[Job ${job.id}] Render error:`, error);
+    // Clean up incomplete file if it exists
+    if (fs.existsSync(outputLocation)) {
+      try {
+        fs.unlinkSync(outputLocation);
+        console.log(`[Job ${job.id}] Successfully cleaned up incomplete output file: ${outputLocation}`);
+      } catch (cleanupErr) {
+        console.error(`[Job ${job.id}] Failed to clean up incomplete file:`, cleanupErr);
+      }
+    }
     throw error;
   }
 }
