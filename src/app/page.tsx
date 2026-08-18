@@ -567,9 +567,11 @@ export default function VideoConverterPage() {
       <header className="border-b border-[#ced4da] bg-white sticky top-0 z-40 px-4 sm:px-6 py-3 shadow-sm">
         <div className="max-w-full mx-auto flex flex-row items-center justify-between gap-4 w-full">
           <div className="flex items-center gap-2 sm:gap-3">
-            <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-[4px] bg-[#5bb75b] flex items-center justify-center shadow-sm shrink-0">
-              <Film className="h-4.5 w-4.5 sm:h-5 sm:w-5 text-white" />
-            </div>
+            <img 
+              src="/logo.jpg" 
+              className="h-9 w-9 sm:h-10 sm:w-10 rounded-[4px] object-cover shadow-sm shrink-0 border border-[#ced4da]" 
+              alt="SVG to MP4 Studio Logo" 
+            />
             <div>
               <div className="flex items-center gap-1.5 sm:gap-2">
                 <h1 className="text-base sm:text-xl font-bold tracking-tight text-[#2e2e2e] uppercase font-sans">
