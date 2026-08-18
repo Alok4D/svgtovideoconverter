@@ -239,9 +239,7 @@ class VideoJobQueue extends EventEmitter {
 
 const globalForQueue = globalThis as unknown as { videoJobQueue?: VideoJobQueue };
 export const videoQueue = globalForQueue.videoJobQueue || new VideoJobQueue();
-if (process.env.NODE_ENV !== 'production') {
-  globalForQueue.videoJobQueue = videoQueue;
-}
+globalForQueue.videoJobQueue = videoQueue;
 
 export const addVideoJob = async (jobData: VideoJobData) => {
   return await videoQueue.add('render', jobData);
