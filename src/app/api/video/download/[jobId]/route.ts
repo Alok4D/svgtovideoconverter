@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import { videoQueue } from '@/lib/video/video.queue';
 
 export async function GET(
   req: Request,
@@ -14,6 +15,14 @@ export async function GET(
       return new NextResponse('Job ID is required', { status: 400 });
     }
 
+    // First, check if the job has a Cloudinary URL stored in the queue/DB
+    const job = await videoQueue.getJob(jobId);
+    if (job?.returnvalue?.videoUrl && job.returnvalue.videoUrl.startsWith('http')) {
+      // Redirect to Cloudinary CDN URL directly — zero server bandwidth used
+      return NextResponse.redirect(job.returnvalue.videoUrl, { status: 302 });
+    }
+
+    // Fallback: serve the file locally (e.g. if Cloudinary upload failed)
     let filePath = path.join(process.cwd(), 'uploads', `video-${jobId}.mp4`);
     let fileExt = 'mp4';
     let contentType = 'video/mp4';
@@ -57,4 +66,3 @@ export async function GET(
     return new NextResponse(error.message || 'Internal server error', { status: 500 });
   }
 }
-

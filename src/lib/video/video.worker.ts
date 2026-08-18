@@ -3,6 +3,7 @@ import fs from 'fs';
 import { bundle } from '@remotion/bundler';
 import { renderMedia, selectComposition } from '@remotion/renderer';
 import { videoQueue, VideoJob, VideoJobResult } from './video.queue';
+import cloudinary from '../cloudinary';
 
 let cachedBundleLocation: string | null = null;
 let bundlingPromise: Promise<string> | null = null;
@@ -96,9 +97,9 @@ export async function processVideoRender(job: VideoJob): Promise<VideoJobResult>
       },
     });
 
-    await job.updateProgress(95, `Finalizing ${fileExt.toUpperCase()} file...`);
+    await job.updateProgress(95, `Uploading to Cloudinary CDN...`);
 
-    // Calculate file size
+    // Calculate local file size before uploading
     let formattedSize = '';
     if (fs.existsSync(outputLocation)) {
       const stats = fs.statSync(outputLocation);
@@ -106,12 +107,36 @@ export async function processVideoRender(job: VideoJob): Promise<VideoJobResult>
       formattedSize = `${mb} MB`;
     }
 
-    const downloadUrl = `/api/video/download/${job.id}`;
+    // Upload rendered video to Cloudinary
+    let videoUrl = `/api/video/download/${job.id}`; // fallback to local
+    try {
+      console.log(`[Job ${job.id}] Uploading to Cloudinary...`);
+      const uploadResult = await cloudinary.uploader.upload(outputLocation, {
+        resource_type: 'video',
+        public_id: `svg-to-video/${job.id}`,
+        overwrite: true,
+        chunk_size: 6000000, // 6MB chunks for large files
+      });
+      videoUrl = uploadResult.secure_url;
+      console.log(`[Job ${job.id}] Cloudinary upload success: ${videoUrl}`);
+
+      // Delete local file after successful Cloudinary upload
+      try {
+        fs.unlinkSync(outputLocation);
+        console.log(`[Job ${job.id}] Local file deleted after Cloudinary upload.`);
+      } catch (deleteErr) {
+        console.warn(`[Job ${job.id}] Could not delete local file (non-fatal):`, deleteErr);
+      }
+    } catch (uploadErr) {
+      console.error(`[Job ${job.id}] Cloudinary upload failed, falling back to local URL:`, uploadErr);
+      // Keep local file and fallback URL if Cloudinary fails
+    }
+
     await job.updateProgress(100, 'Video ready!');
-    console.log(`[Job ${job.id}] Render completed successfully: ${outputLocation} (${formattedSize})`);
+    console.log(`[Job ${job.id}] Render completed successfully: ${formattedSize}`);
 
     return {
-      videoUrl: downloadUrl,
+      videoUrl,
       duration,
       fps,
       width,
