@@ -37,7 +37,8 @@ app.prepare().then(() => {
       process.exit(1);
     })
     .listen(port, () => {
-      console.log(`> Ready on http://${hostname}:${port}`);
+      console.log(`> Ready on http://localhost:${port}`);
+      console.log(`> Listening on all interfaces: http://${hostname}:${port}`);
       console.log('> Video Worker and Queue Engine active.');
     });
 });
