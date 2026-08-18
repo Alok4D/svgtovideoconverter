@@ -30,6 +30,8 @@ import {
   AlertCircle,
   ExternalLink,
   Film,
+  Maximize2,
+  Minimize2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -137,9 +139,23 @@ export default function VideoConverterPage() {
   } | null>(null);
 
   const [activeMobileTab, setActiveMobileTab] = useState<"editor" | "preview">("editor");
+  const [isFullscreenPreview, setIsFullscreenPreview] = useState(false);
 
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Listen for Escape key to close fullscreen preview
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsFullscreenPreview(false);
+      }
+    };
+    if (isFullscreenPreview) {
+      window.addEventListener("keydown", handleKeyDown);
+    }
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isFullscreenPreview]);
 
   // Debounced preview key updater
   useEffect(() => {
@@ -476,6 +492,16 @@ export default function VideoConverterPage() {
                 >
                   <RotateCcw className="h-3.5 w-3.5" />
                 </Button>
+
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 text-[#6c757d] hover:text-[#2e2e2e] hover:bg-slate-200 rounded-[3px]"
+                  onClick={() => setIsFullscreenPreview(true)}
+                  title="Fullscreen Preview"
+                >
+                  <Maximize2 className="h-3.5 w-3.5" />
+                </Button>
               </div>
             </div>
 
@@ -700,6 +726,94 @@ export default function VideoConverterPage() {
           )}
         </section>
       </main>
+
+      {/* Fullscreen SVG Preview Modal */}
+      {isFullscreenPreview && (
+        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex flex-col animate-in fade-in duration-200">
+          {/* Header Bar */}
+          <div className="flex items-center justify-between p-4 border-b border-white/10 bg-slate-900/80 text-white">
+            <span className="text-sm font-semibold font-sans">Fullscreen SVG Preview</span>
+
+            <div className="flex items-center gap-3">
+              {/* Background Pattern Switcher */}
+              <div className="flex bg-slate-800 rounded-[3px] p-0.5 border border-white/10">
+                <button
+                  onClick={() => setBgPattern("dark")}
+                  className={`px-2.5 py-1 text-[11px] rounded-[3px] transition-all ${
+                    bgPattern === "dark" ? "bg-[#5bb75b] text-white font-medium shadow-sm" : "text-slate-400 hover:text-white"
+                  }`}
+                >
+                  Dark
+                </button>
+                <button
+                  onClick={() => setBgPattern("checker")}
+                  className={`px-2.5 py-1 text-[11px] rounded-[3px] transition-all ${
+                    bgPattern === "checker" ? "bg-[#5bb75b] text-white font-medium shadow-sm" : "text-slate-400 hover:text-white"
+                  }`}
+                >
+                  Grid
+                </button>
+                <button
+                  onClick={() => setBgPattern("light")}
+                  className={`px-2.5 py-1 text-[11px] rounded-[3px] transition-all ${
+                    bgPattern === "light" ? "bg-[#5bb75b] text-white font-medium shadow-sm" : "text-slate-400 hover:text-white"
+                  }`}
+                >
+                  Light
+                </button>
+              </div>
+
+              {/* Restart Preview */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-slate-400 hover:text-white hover:bg-slate-800 rounded-[3px]"
+                onClick={() => setPreviewKey((k) => k + 1)}
+                title="Restart Animation"
+              >
+                <RotateCcw className="h-4 w-4" />
+              </Button>
+
+              {/* Close Button */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-slate-400 hover:text-white hover:bg-slate-800 rounded-[3px]"
+                onClick={() => setIsFullscreenPreview(false)}
+                title="Exit Fullscreen"
+              >
+                <Minimize2 className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Fullscreen Frame */}
+          <div
+            className={`flex-1 flex items-center justify-center p-6 sm:p-12 relative overflow-hidden transition-all ${
+              bgPattern === "checker"
+                ? "bg-slate-900"
+                : bgPattern === "light"
+                ? "bg-slate-200"
+                : "bg-black"
+            }`}
+            style={
+              bgPattern === "checker"
+                ? {
+                    backgroundImage:
+                      "radial-gradient(circle, #334155 1.5px, transparent 1.5px)",
+                    backgroundSize: "24px 24px",
+                  }
+                : undefined
+            }
+          >
+            <div
+              key={`fs-${previewKey}`}
+              className="w-full h-full max-w-[90vw] max-h-[80vh] flex items-center justify-center [&>svg]:max-w-full [&>svg]:max-h-full [&>svg]:w-auto [&>svg]:h-auto transition-all"
+              dangerouslySetInnerHTML={{ __html: svgCode }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
