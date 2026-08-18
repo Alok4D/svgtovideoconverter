@@ -22,7 +22,10 @@ async function getOrBuildBundle(): Promise<string> {
 
   bundlingPromise = bundle({
     entryPoint,
-    webpackOverride: (config) => config,
+    webpackOverride: (config) => {
+      config.devtool = false; // Disable source maps to save memory on 512MB RAM servers
+      return config;
+    },
   }).then((loc) => {
     cachedBundleLocation = loc;
     bundlingPromise = null;
