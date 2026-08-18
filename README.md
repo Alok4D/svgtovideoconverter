@@ -38,17 +38,31 @@ A powerful, high-performance web application that compiles animated SVGs (SMIL, 
 
 ---
 
-## 🛠️ Installation & Setup (Localhost)
+## 🛠️ Local Installation & Setup Guide (কারো নিজের PC তে চালানোর নিয়ম)
 
-### 1. Prerequisites
-- **Node.js** (v18 or v20+ recommended)
-- **pnpm** (preferred) or npm/yarn
-- **FFmpeg** installed on your operating system
+If you want to run this project locally on your Windows, Mac, or Linux computer, follow these simple steps:
 
-### 2. Get the Code
+### 1. Prerequisites (যা যা ইন্সটল থাকতে হবে)
+- **Node.js:** v18 or v20+ must be installed on your PC.
+- **pnpm:** Recommended package manager. (Install via `npm install -g pnpm`).
+- **FFmpeg:** Required for rendering videos. You must install it on your operating system:
+  - **Windows:** 
+    1. Download the FFmpeg build from [ffmpeg.org](https://ffmpeg.org/download.html).
+    2. Extract it and add the `bin` folder path to your system's **Environment Variables (PATH)**.
+    3. *Alternatively*, install via PowerShell: `winget install Gyan.FFmpeg`
+  - **macOS:** Install via Homebrew: `brew install ffmpeg`
+  - **Linux (Ubuntu/Debian):** `sudo apt update && sudo apt install -y ffmpeg`
+
+### 2. Clone and Install Dependencies
+Open your terminal (PowerShell, Command Prompt, or Terminal) and run:
 ```bash
+# Clone the repository
 git clone https://github.com/Alok4D/svgtovideoconverter.git
+
+# Move into the project directory
 cd svgtovideoconverter
+
+# Install packages
 pnpm install
 ```
 
