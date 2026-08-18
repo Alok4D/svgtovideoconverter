@@ -283,7 +283,7 @@ export default function VideoConverterPage() {
     <div className="min-h-screen flex flex-col bg-[#eaeaea] text-[#2e2e2e] selection:bg-[#5bb75b] selection:text-white font-sans">
       {/* Top Navigation Bar */}
       <header className="border-b border-[#ced4da] bg-white sticky top-0 z-40 px-6 py-3.5 shadow-sm">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="max-w-full mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-[4px] bg-[#5bb75b] flex items-center justify-center shadow-sm">
               <Film className="h-5 w-5 text-white" />
@@ -327,7 +327,7 @@ export default function VideoConverterPage() {
       </header>
 
       {/* Main Workspace */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <main className="flex-1 max-w-full w-full mx-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Column: Code Editor & Presets (7 cols) */}
         <section className="lg:col-span-7 flex flex-col gap-4">
           <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-3 rounded-[4px] border border-[#ced4da] shadow-sm">
@@ -347,7 +347,7 @@ export default function VideoConverterPage() {
                   }
                 }}
               >
-                <SelectTrigger className="h-8 text-xs bg-white border-[#ced4da] w-[170px] text-[#2e2e2e] rounded-[3px] hover:border-[#5bb75b] focus:ring-[#5bb75b]">
+                <SelectTrigger className="h-9 px-4 text-xs bg-white border-[#ced4da] w-[170px] text-[#2e2e2e] rounded-full hover:border-[#5bb75b] focus:ring-[#5bb75b]">
                   <SelectValue placeholder="✨ Load Preset" />
                 </SelectTrigger>
                 <SelectContent className="bg-white border-[#ced4da] text-[#2e2e2e]">
@@ -511,7 +511,7 @@ export default function VideoConverterPage() {
               <div className="space-y-1.5">
                 <Label className="text-xs text-[#6c757d] font-sans">Resolution</Label>
                 <Select value={resolution} onValueChange={(val) => val && setResolution(val)}>
-                  <SelectTrigger className="bg-white border-[#ced4da] text-[#2e2e2e] text-xs rounded-[3px] hover:border-[#5bb75b]">
+                  <SelectTrigger className="bg-white border-[#ced4da] text-[#2e2e2e] text-xs rounded-full h-9 px-4 hover:border-[#5bb75b] focus:ring-[#5bb75b] focus-visible:border-[#5bb75b] focus-visible:ring-[#5bb75b]">
                     <SelectValue placeholder="Resolution" />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-[#ced4da] text-[#2e2e2e]">
@@ -528,7 +528,7 @@ export default function VideoConverterPage() {
               <div className="space-y-1.5">
                 <Label className="text-xs text-[#6c757d] font-sans">Frame Rate</Label>
                 <Select value={fps} onValueChange={(val) => val && setFps(val)}>
-                  <SelectTrigger className="bg-white border-[#ced4da] text-[#2e2e2e] text-xs rounded-[3px] hover:border-[#5bb75b]">
+                  <SelectTrigger className="bg-white border-[#ced4da] text-[#2e2e2e] text-xs rounded-full h-9 px-4 hover:border-[#5bb75b] focus:ring-[#5bb75b] focus-visible:border-[#5bb75b] focus-visible:ring-[#5bb75b]">
                     <SelectValue placeholder="FPS" />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-[#ced4da] text-[#2e2e2e]">
@@ -543,7 +543,7 @@ export default function VideoConverterPage() {
               <div className="sm:col-span-2 space-y-1.5">
                 <Label className="text-xs text-[#6c757d] font-sans">Video Codec</Label>
                 <Select value={codec} onValueChange={(val) => val && setCodec(val as any)}>
-                  <SelectTrigger className="bg-white border-[#ced4da] text-[#2e2e2e] text-xs rounded-[3px] hover:border-[#5bb75b]">
+                  <SelectTrigger className="bg-white border-[#ced4da] text-[#2e2e2e] text-xs rounded-full h-9 px-4 hover:border-[#5bb75b] focus:ring-[#5bb75b] focus-visible:border-[#5bb75b] focus-visible:ring-[#5bb75b]">
                     <SelectValue placeholder="Codec" />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-[#ced4da] text-[#2e2e2e]">
