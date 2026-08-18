@@ -32,6 +32,7 @@ import {
   Film,
 } from "lucide-react";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 const SVG_PRESETS = [
   {
@@ -134,6 +135,8 @@ export default function VideoConverterPage() {
     stage: string;
     progress: number;
   } | null>(null);
+
+  const [activeMobileTab, setActiveMobileTab] = useState<"editor" | "preview">("editor");
 
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -265,42 +268,42 @@ export default function VideoConverterPage() {
   return (
     <div className="min-h-screen flex flex-col bg-[#eaeaea] text-[#2e2e2e] selection:bg-[#5bb75b] selection:text-white font-sans">
       {/* Top Navigation Bar */}
-      <header className="border-b border-[#ced4da] bg-white sticky top-0 z-40 px-6 py-3.5 shadow-sm">
-        <div className="max-w-full mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-[4px] bg-[#5bb75b] flex items-center justify-center shadow-sm">
-              <Film className="h-5 w-5 text-white" />
+      <header className="border-b border-[#ced4da] bg-white sticky top-0 z-40 px-4 sm:px-6 py-3 shadow-sm">
+        <div className="max-w-full mx-auto flex flex-row items-center justify-between gap-4 w-full">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-[4px] bg-[#5bb75b] flex items-center justify-center shadow-sm shrink-0">
+              <Film className="h-4.5 w-4.5 sm:h-5 sm:w-5 text-white" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-xl font-bold tracking-tight text-[#2e2e2e] uppercase font-sans">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <h1 className="text-base sm:text-xl font-bold tracking-tight text-[#2e2e2e] uppercase font-sans">
                   SVG to MP4 <span className="text-[#5bb75b] font-normal">Studio</span>
                 </h1>
-                <span className="text-[11px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-[3px] bg-[#f8f9fa] text-[#6c757d] border border-[#ced4da]">
-                  Utility Converter
+                <span className="text-[10px] sm:text-[11px] font-semibold tracking-wider uppercase px-1.5 py-0.5 rounded-[3px] bg-[#f8f9fa] text-[#6c757d] border border-[#ced4da] hidden xs:inline-block">
+                  Utility
                 </span>
               </div>
-              <p className="text-xs text-[#6c757d] font-sans">
+              <p className="text-[11px] sm:text-xs text-[#6c757d] font-sans hidden sm:block">
                 Convert animated SVGs (SMIL, CSS) into high quality H.264 MP4 & ProRes MOV files.
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+          <div className="flex items-center gap-2 sm:gap-3 justify-end shrink-0">
             <Button
               onClick={handleExport}
               disabled={isExporting}
-              size="lg"
-              className="bg-[#5bb75b] hover:bg-[#449d44] text-white font-semibold shadow-sm border-0 rounded-[4px] transition-all duration-150 active:scale-95 disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5bb75b]"
+              size="default"
+              className="bg-[#5bb75b] hover:bg-[#449d44] text-white font-semibold shadow-sm border-0 rounded-[4px] transition-all duration-150 active:scale-95 disabled:opacity-50 text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5"
             >
               {isExporting ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  <Loader2 className="h-4 w-4 animate-spin mr-1.5 sm:mr-2" />
                   Generating ({progressState?.progress || 0}%)
                 </>
               ) : (
                 <>
-                  <Video className="h-4 w-4 mr-2" />
+                  <Video className="h-4 w-4 mr-1.5 sm:mr-2" />
                   Convert to MP4
                 </>
               )}
@@ -309,10 +312,34 @@ export default function VideoConverterPage() {
         </div>
       </header>
 
+      {/* Mobile Tab Switcher */}
+      <div className="lg:hidden flex border-b border-[#ced4da] bg-white sticky top-[65px] z-30 p-2 gap-2 shadow-sm">
+        <button
+          onClick={() => setActiveMobileTab('editor')}
+          className={`flex-1 py-2 text-center text-xs sm:text-sm font-semibold rounded-[4px] border transition-all ${
+            activeMobileTab === 'editor'
+              ? 'bg-[#5bb75b] border-[#5bb75b] text-white'
+              : 'bg-white border-[#ced4da] text-slate-700 hover:bg-slate-50'
+          }`}
+        >
+          Code Editor
+        </button>
+        <button
+          onClick={() => setActiveMobileTab('preview')}
+          className={`flex-1 py-2 text-center text-xs sm:text-sm font-semibold rounded-[4px] border transition-all ${
+            activeMobileTab === 'preview'
+              ? 'bg-[#5bb75b] border-[#5bb75b] text-white'
+              : 'bg-white border-[#ced4da] text-slate-700 hover:bg-slate-50'
+          }`}
+        >
+          Preview & Settings
+        </button>
+      </div>
+
       {/* Main Workspace */}
       <main className="flex-1 max-w-full w-full mx-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Column: Code Editor & Presets (7 cols) */}
-        <section className="lg:col-span-7 flex flex-col gap-4">
+        <section className={cn("lg:col-span-7 flex flex-col gap-4 w-full", activeMobileTab !== 'editor' && "hidden lg:flex")}>
           <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-3 rounded-[4px] border border-[#ced4da] shadow-sm">
             <div className="flex items-center gap-2">
               <Code2 className="h-4 w-4 text-[#5bb75b]" />
@@ -405,7 +432,7 @@ export default function VideoConverterPage() {
         </section>
 
         {/* Right Column: Live Preview, Settings & Render Progress (5 cols) */}
-        <section className="lg:col-span-5 flex flex-col gap-6">
+        <section className={cn("lg:col-span-5 flex flex-col gap-6 w-full", activeMobileTab !== 'preview' && "hidden lg:flex")}>
           {/* Live SVG Preview */}
           <div className="rounded-[4px] border border-[#ced4da] bg-white overflow-hidden shadow-sm flex flex-col">
             <div className="flex items-center justify-between px-4 py-3 border-b border-[#ced4da] bg-[#f8f9fa]">
