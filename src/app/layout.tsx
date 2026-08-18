@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Open_Sans, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const openSans = Open_Sans({
+  variable: "--font-sans",
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
 });
 
 const geistMono = Geist_Mono({
@@ -14,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SVG to Video (MP4) Studio - High Quality Stock Converter",
-  description: "Convert animated SVGs (SMIL, CSS) into crystal-clear 4K, 1080p MP4 videos for Adobe Stock, Motion Graphics, and Social Media.",
+  title: "SVG to MP4 Converter - High Quality Graphics Renderer",
+  description: "Transform animated SVGs into premium ProRes MOV & H.264 MP4 videos.",
 };
 
 export default function RootLayout({
@@ -26,11 +27,11 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} dark h-full antialiased`}
+      className={`${openSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-slate-950 text-slate-100 font-sans">
+      <body className="min-h-full flex flex-col bg-[#eaeaea] text-[#2e2e2e] font-sans">
         {children}
-        <Toaster position="top-right" richColors theme="dark" />
+        <Toaster position="top-right" richColors theme="light" />
       </body>
     </html>
   );

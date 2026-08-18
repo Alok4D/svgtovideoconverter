@@ -3,6 +3,7 @@ import fs from 'fs';
 import { bundle } from '@remotion/bundler';
 import { renderMedia, selectComposition } from '@remotion/renderer';
 import { videoQueue, VideoJob, VideoJobResult } from './video.queue';
+import cloudinary from '../cloudinary';
 
 let cachedBundleLocation: string | null = null;
 let bundlingPromise: Promise<string> | null = null;
@@ -35,9 +36,9 @@ async function getOrBuildBundle(): Promise<string> {
 }
 
 export async function processVideoRender(job: VideoJob): Promise<VideoJobResult> {
-  const { svgCode, fps = 30, duration = 5, width = 1920, height = 1080 } = job.data;
+  const { svgCode, fps = 30, duration = 5, width = 1920, height = 1080, codec = 'h264' } = job.data;
   
-  console.log(`[Job ${job.id}] Starting SVG to MP4 render: ${width}x${height} @ ${fps}fps, ${duration}s`);
+  console.log(`[Job ${job.id}] Starting SVG to ${codec.toUpperCase()} render: ${width}x${height} @ ${fps}fps, ${duration}s`);
   await job.updateProgress(10, 'Preparing Remotion renderer...');
 
   const compositionId = 'SvgVideo';
@@ -48,7 +49,8 @@ export async function processVideoRender(job: VideoJob): Promise<VideoJobResult>
     fs.mkdirSync(outDir, { recursive: true });
   }
 
-  const outputLocation = path.join(outDir, `video-${job.id}.mp4`);
+  const fileExt = codec === 'prores' ? 'mov' : 'mp4';
+  const outputLocation = path.join(outDir, `video-${job.id}.${fileExt}`);
   const durationInFrames = Math.max(1, Math.round(duration * fps));
 
   try {
@@ -74,7 +76,9 @@ export async function processVideoRender(job: VideoJob): Promise<VideoJobResult>
     await renderMedia({
       composition,
       serveUrl: bundleLocation,
-      codec: 'h264',
+      codec: codec === 'prores' ? 'prores' : 'h264',
+      pixelFormat: codec === 'prores' ? 'yuv422p10le' : 'yuv420p',
+      crf: codec === 'prores' ? undefined : 16,
       outputLocation,
       inputProps: {
         svgCode,
@@ -84,7 +88,7 @@ export async function processVideoRender(job: VideoJob): Promise<VideoJobResult>
         height,
       },
       frameRange: [0, durationInFrames - 1],
-      imageFormat: 'jpeg',
+      imageFormat: 'png',
       onProgress: ({ progress }) => {
         // Map remotion progress (0.0 to 1.0) to (40% to 95%)
         const currentProgress = 40 + Math.floor(progress * 55);
@@ -93,9 +97,9 @@ export async function processVideoRender(job: VideoJob): Promise<VideoJobResult>
       },
     });
 
-    await job.updateProgress(95, 'Finalizing MP4 file...');
+    await job.updateProgress(95, `Uploading to Cloudinary CDN...`);
 
-    // Calculate file size
+    // Calculate local file size before uploading
     let formattedSize = '';
     if (fs.existsSync(outputLocation)) {
       const stats = fs.statSync(outputLocation);
@@ -103,20 +107,54 @@ export async function processVideoRender(job: VideoJob): Promise<VideoJobResult>
       formattedSize = `${mb} MB`;
     }
 
-    const downloadUrl = `/api/video/download/${job.id}`;
+    // Upload rendered video to Cloudinary
+    let videoUrl = `/api/video/download/${job.id}`; // fallback to local
+    try {
+      console.log(`[Job ${job.id}] Uploading to Cloudinary...`);
+      const uploadResult = await cloudinary.uploader.upload(outputLocation, {
+        resource_type: 'video',
+        public_id: `svg-to-video/${job.id}`,
+        overwrite: true,
+        chunk_size: 6000000, // 6MB chunks for large files
+      });
+      videoUrl = uploadResult.secure_url;
+      console.log(`[Job ${job.id}] Cloudinary upload success: ${videoUrl}`);
+
+      // Delete local file after successful Cloudinary upload
+      try {
+        fs.unlinkSync(outputLocation);
+        console.log(`[Job ${job.id}] Local file deleted after Cloudinary upload.`);
+      } catch (deleteErr) {
+        console.warn(`[Job ${job.id}] Could not delete local file (non-fatal):`, deleteErr);
+      }
+    } catch (uploadErr) {
+      console.error(`[Job ${job.id}] Cloudinary upload failed, falling back to local URL:`, uploadErr);
+      // Keep local file and fallback URL if Cloudinary fails
+    }
+
     await job.updateProgress(100, 'Video ready!');
-    console.log(`[Job ${job.id}] Render completed successfully: ${outputLocation} (${formattedSize})`);
+    console.log(`[Job ${job.id}] Render completed successfully: ${formattedSize}`);
 
     return {
-      videoUrl: downloadUrl,
+      videoUrl,
       duration,
       fps,
       width,
       height,
       fileSize: formattedSize,
+      codec,
     };
   } catch (error: any) {
     console.error(`[Job ${job.id}] Render error:`, error);
+    // Clean up incomplete file if it exists
+    if (fs.existsSync(outputLocation)) {
+      try {
+        fs.unlinkSync(outputLocation);
+        console.log(`[Job ${job.id}] Successfully cleaned up incomplete output file: ${outputLocation}`);
+      } catch (cleanupErr) {
+        console.error(`[Job ${job.id}] Failed to clean up incomplete file:`, cleanupErr);
+      }
+    }
     throw error;
   }
 }

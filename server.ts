@@ -1,3 +1,4 @@
+import './src/lib/env';
 import { createServer } from 'http';
 import { parse } from 'url';
 import path from 'path';
