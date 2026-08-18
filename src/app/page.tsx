@@ -62,21 +62,103 @@ const SVG_PRESETS = [
   {
     name: "Stock Cyber Portal",
     code: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
-  <rect width="100%" height="100%" fill="#09090b" />
+  <defs>
+    <!-- Cyan Neon Glow -->
+    <filter id="neon-glow-cyan" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="6" result="blur1" />
+      <feGaussianBlur stdDeviation="15" result="blur2" />
+      <feMerge>
+        <feMergeNode in="blur2" />
+        <feMergeNode in="blur1" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+    
+    <!-- Magenta Neon Glow -->
+    <filter id="neon-glow-magenta" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="8" result="blur1" />
+      <feGaussianBlur stdDeviation="20" result="blur2" />
+      <feMerge>
+        <feMergeNode in="blur2" />
+        <feMergeNode in="blur1" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+    
+    <!-- Core Glow -->
+    <radialGradient id="core-grad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="1" />
+      <stop offset="30%" stop-color="#ff007f" stop-opacity="0.8" />
+      <stop offset="70%" stop-color="#00f3ff" stop-opacity="0.2" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+    </radialGradient>
+    
+    <!-- Grid Overlay -->
+    <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
+      <path d="M 60 0 L 0 0 0 60" fill="none" stroke="#1f1f2e" stroke-width="1.5" />
+    </pattern>
+  </defs>
+
+  <!-- Deep Sci-Fi Background -->
+  <rect width="100%" height="100%" fill="#0a0a12" />
+  <rect width="100%" height="100%" fill="url(#grid)" opacity="0.4" />
+  
+  <!-- Cyber Portal Core Container -->
   <g transform="translate(960, 540)">
-    <polygon points="0,-220 190,-110 190,110 0,220 -190,110 -190,-110" fill="none" stroke="#10b981" stroke-width="5">
-      <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="10s" repeatCount="indefinite" />
+    
+    <!-- Background Portal Glow -->
+    <circle r="400" fill="none" stroke="#ff007f" stroke-dasharray="2, 8" stroke-width="1" opacity="0.3">
+      <animateTransform attributeName="transform" type="rotate" from="0" to="-360" dur="40s" repeatCount="indefinite" />
+    </circle>
+    
+    <!-- 1. Outer Tech Ring (Teal, Dashed, Fast Rotation) -->
+    <circle r="360" fill="none" stroke="#00f3ff" stroke-width="3" stroke-dasharray="10 30 180 30" opacity="0.8" filter="url(#neon-glow-cyan)">
+      <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="16s" repeatCount="indefinite" />
+    </circle>
+    
+    <!-- 2. Middle Tech Ring (Magenta, Dotted Radar) -->
+    <circle r="300" fill="none" stroke="#ff007f" stroke-width="2" stroke-dasharray="4 16" opacity="0.7" filter="url(#neon-glow-magenta)">
+      <animateTransform attributeName="transform" type="rotate" from="360" to="0" dur="25s" repeatCount="indefinite" />
+    </circle>
+    
+    <!-- 3. Outer Hexagon (Rotating Teal) -->
+    <polygon points="0,-250 216,-125 216,125 0,250 -216,125 -216,-125" fill="none" stroke="#00f3ff" stroke-width="4" opacity="0.9" filter="url(#neon-glow-cyan)">
+      <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="12s" repeatCount="indefinite" />
     </polygon>
-    <polygon points="0,-160 138,-80 138,80 0,160 -138,80 -138,-80" fill="none" stroke="#06b6d4" stroke-width="4">
-      <animateTransform attributeName="transform" type="rotate" from="360" to="0" dur="7s" repeatCount="indefinite" />
+    
+    <!-- 4. Inner Hexagon (Opposite Rotating Magenta) -->
+    <polygon points="0,-190 164,-95 164,95 0,190 -164,95 -164,-95" fill="none" stroke="#ff007f" stroke-width="3" opacity="0.75" filter="url(#neon-glow-magenta)">
+      <animateTransform attributeName="transform" type="rotate" from="360" to="0" dur="8s" repeatCount="indefinite" />
     </polygon>
-    <circle r="60" fill="#f43f5e">
-      <animate attributeName="r" values="40;80;40" dur="2s" repeatCount="indefinite" />
+    
+    <!-- 5. Crosshair Elements -->
+    <g stroke="#00f3ff" stroke-width="1.5" opacity="0.6">
+      <line x1="-390" y1="0" x2="-330" y2="0" />
+      <line x1="330" y1="0" x2="390" y2="0" />
+      <line x1="0" y1="-390" x2="0" y2="-330" />
+      <line x1="0" y1="330" x2="0" y2="390" />
+      <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="30s" repeatCount="indefinite" />
+    </g>
+    
+    <!-- 6. Dotted Portal Nodes (Spinning Orbitals) -->
+    <g>
+      <circle cx="0" cy="-300" r="8" fill="#00f3ff" filter="url(#neon-glow-cyan)" />
+      <circle cx="0" cy="300" r="8" fill="#00f3ff" filter="url(#neon-glow-cyan)" />
+      <circle cx="-259.8" cy="-150" r="6" fill="#ff007f" filter="url(#neon-glow-magenta)" />
+      <circle cx="259.8" cy="150" r="6" fill="#ff007f" filter="url(#neon-glow-magenta)" />
+      <circle cx="259.8" cy="-150" r="6" fill="#ff007f" filter="url(#neon-glow-magenta)" />
+      <circle cx="-259.8" cy="150" r="6" fill="#ff007f" filter="url(#neon-glow-magenta)" />
+      <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="20s" repeatCount="indefinite" />
+    </g>
+    
+    <!-- 7. Portal Core (Pulsing Light Source) -->
+    <circle r="90" fill="url(#core-grad)">
       <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite" />
     </circle>
-    <text y="340" font-family="sans-serif" font-size="24" fill="#a1a1aa" font-weight="600" letter-spacing="8" text-anchor="middle">
-      FUTURISTIC ENERGY
-    </text>
+    <circle r="50" fill="#ffffff" filter="url(#neon-glow-cyan)">
+      <animate attributeName="r" values="40;55;40" dur="2s" repeatCount="indefinite" />
+    </circle>
+    
   </g>
 </svg>`,
   },
@@ -84,29 +166,187 @@ const SVG_PRESETS = [
     name: "Modern Floating Waves",
     code: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
   <defs>
-    <linearGradient id="waveGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#f59e0b" />
-      <stop offset="50%" stop-color="#ef4444" />
-      <stop offset="100%" stop-color="#8b5cf6" />
+    <!-- Rich Gradients for Purple-Blue Waves -->
+    <linearGradient id="grad-purple-1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4e54c8" />
+      <stop offset="50%" stop-color="#8f94fb" />
+      <stop offset="100%" stop-color="#00f3ff" />
     </linearGradient>
+    <linearGradient id="grad-purple-2" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#3f2b96" />
+      <stop offset="100%" stop-color="#a8c0ff" />
+    </linearGradient>
+
+    <!-- Rich Gradients for Magenta-Pink Waves -->
+    <linearGradient id="grad-magenta-1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fc00ff" />
+      <stop offset="100%" stop-color="#00dbde" />
+    </linearGradient>
+    <linearGradient id="grad-magenta-2" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ff007f" />
+      <stop offset="50%" stop-color="#7900ff" />
+      <stop offset="100%" stop-color="#110724" />
+    </linearGradient>
+
+    <!-- Luminous Neon Line Gradients -->
+    <linearGradient id="grad-line-cyan" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00f3ff" stop-opacity="0.1" />
+      <stop offset="50%" stop-color="#00f3ff" stop-opacity="0.6" />
+      <stop offset="100%" stop-color="#ff007f" stop-opacity="0.1" />
+    </linearGradient>
+    
+    <linearGradient id="grad-line-magenta" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ff007f" stop-opacity="0.1" />
+      <stop offset="50%" stop-color="#ff007f" stop-opacity="0.5" />
+      <stop offset="100%" stop-color="#00f3ff" stop-opacity="0.1" />
+    </linearGradient>
+
+    <!-- Ambient Backlight Glowing Centers -->
+    <radialGradient id="ambient-cyan" cx="20%" cy="30%" r="50%">
+      <stop offset="0%" stop-color="#00f3ff" stop-opacity="0.35" />
+      <stop offset="100%" stop-color="#05050e" stop-opacity="0" />
+    </radialGradient>
+    
+    <radialGradient id="ambient-magenta" cx="80%" cy="70%" r="60%">
+      <stop offset="0%" stop-color="#ff007f" stop-opacity="0.3" />
+      <stop offset="100%" stop-color="#05050e" stop-opacity="0" />
+    </radialGradient>
+    
+    <radialGradient id="bg-radial" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#140a2b" />
+      <stop offset="100%" stop-color="#040409" />
+    </radialGradient>
+
+    <!-- Drop Shadows -->
+    <filter id="shadow-deep" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="-12" dy="20" stdDeviation="25" flood-color="#000000" flood-opacity="0.75" />
+    </filter>
   </defs>
-  <rect width="100%" height="100%" fill="#18181b" />
+
+  <!-- Deep Dark Luminous Space Background -->
+  <rect width="100%" height="100%" fill="url(#bg-radial)" />
+  <rect width="100%" height="100%" fill="url(#ambient-cyan)" />
+  <rect width="100%" height="100%" fill="url(#ambient-magenta)" />
+
+  <!-- A. Tech Dots Matrix (Visible and Pulsing beautifully) -->
+  <g fill="#ffffff" opacity="0.35" filter="url(#shadow-deep)">
+    <!-- Top-Left Grid -->
+    <g transform="translate(100, 120)">
+      <circle cx="0" cy="0" r="3.5" /><circle cx="40" cy="0" r="3.5" /><circle cx="80" cy="0" r="3.5" /><circle cx="120" cy="0" r="3.5" /><circle cx="160" cy="0" r="3.5" /><circle cx="200" cy="0" r="3.5" />
+      <circle cx="0" cy="30" r="3.5" /><circle cx="40" cy="30" r="3.5" /><circle cx="80" cy="30" r="3.5" /><circle cx="120" cy="30" r="3.5" /><circle cx="160" cy="30" r="3.5" /><circle cx="200" cy="30" r="3.5" />
+      <circle cx="0" cy="60" r="3.5" /><circle cx="40" cy="60" r="3.5" /><circle cx="80" cy="60" r="3.5" /><circle cx="120" cy="60" r="3.5" /><circle cx="160" cy="60" r="3.5" /><circle cx="200" cy="60" r="3.5" />
+      <animate attributeName="opacity" values="0.25;0.65;0.25" dur="5s" repeatCount="indefinite" />
+    </g>
+    
+    <!-- Bottom-Right Grid -->
+    <g transform="translate(1620, 880)">
+      <circle cx="0" cy="0" r="3.5" /><circle cx="40" cy="0" r="3.5" /><circle cx="80" cy="0" r="3.5" /><circle cx="120" cy="0" r="3.5" /><circle cx="160" cy="0" r="3.5" /><circle cx="200" cy="0" r="3.5" />
+      <circle cx="0" cy="30" r="3.5" /><circle cx="40" cy="30" r="3.5" /><circle cx="80" cy="30" r="3.5" /><circle cx="120" cy="30" r="3.5" /><circle cx="160" cy="30" r="3.5" /><circle cx="200" cy="30" r="3.5" />
+      <circle cx="0" cy="60" r="3.5" /><circle cx="40" cy="60" r="3.5" /><circle cx="80" cy="60" r="3.5" /><circle cx="120" cy="60" r="3.5" /><circle cx="160" cy="60" r="3.5" /><circle cx="200" cy="60" r="3.5" />
+      <animate attributeName="opacity" values="0.65;0.25;0.65" dur="5s" repeatCount="indefinite" />
+    </g>
+  </g>
+
+  <!-- B. Glowing Topological Wave Contours (Beautiful cyan & magenta neon lines) -->
+  <g fill="none" stroke-width="1.5">
+    <!-- Top-to-Bottom Cyber Stream (Cyan) -->
+    <path stroke="url(#grad-line-cyan)">
+      <animate attributeName="d" values="
+        M-50,220 C400,380 700,200 1000,120 C1200,50 1400,80 1700,180;
+        M-50,270 C400,300 700,260 1000,180 C1200,100 1400,130 1700,230;
+        M-50,220 C400,380 700,200 1000,120 C1200,50 1400,80 1700,180
+      " dur="8s" repeatCount="indefinite" />
+    </path>
+    <path stroke="url(#grad-line-cyan)">
+      <animate attributeName="d" values="
+        M-50,250 C400,410 700,230 1000,150 C1200,80 1400,110 1700,210;
+        M-50,300 C400,330 700,290 1000,210 C1200,130 1400,160 1700,260;
+        M-50,250 C400,410 700,230 1000,150 C1200,80 1400,110 1700,210
+      " dur="8s" repeatCount="indefinite" />
+    </path>
+    <path stroke="url(#grad-line-cyan)">
+      <animate attributeName="d" values="
+        M-50,280 C400,440 700,260 1000,180 C1200,110 1400,140 1700,240;
+        M-50,330 C400,360 700,320 1000,240 C1200,160 1400,190 1700,290;
+        M-50,280 C400,440 700,260 1000,180 C1200,110 1400,140 1700,240
+      " dur="8s" repeatCount="indefinite" />
+    </path>
+
+    <!-- Bottom-Right Cyber Stream (Magenta) -->
+    <path stroke="url(#grad-line-magenta)">
+      <animate attributeName="d" values="
+        M300,1100 C600,1020 900,740 1400,880 C1600,940 1750,860 1970,910;
+        M300,1100 C600,960 900,800 1400,820 C1600,880 1750,920 1970,860;
+        M300,1100 C600,1020 900,740 1400,880 C1600,940 1750,860 1970,910
+      " dur="9s" repeatCount="indefinite" />
+    </path>
+    <path stroke="url(#grad-line-magenta)">
+      <animate attributeName="d" values="
+        M300,1100 C600,1000 900,760 1400,860 C1600,920 1750,840 1970,890;
+        M300,1100 C600,940 900,820 1400,800 C1600,860 1750,900 1970,840;
+        M300,1100 C600,1000 900,760 1400,860 C1600,920 1750,840 1970,890
+      " dur="9s" repeatCount="indefinite" />
+    </path>
+  </g>
+
+  <!-- C. Multi-Layer Overlapping Fluid Waves (Beautiful depth & transparency blending) -->
   
-  <path fill="url(#waveGrad)" opacity="0.8">
-    <animate attributeName="d" 
-      values="
-        M0,540 C480,400 960,680 1920,540 L1920,1080 L0,1080 Z;
-        M0,540 C480,680 960,400 1920,540 L1920,1080 L0,1080 Z;
-        M0,540 C480,400 960,680 1920,540 L1920,1080 L0,1080 Z
-      " 
-      dur="4s" 
-      repeatCount="indefinite" 
-    />
+  <!-- 1. Magenta Wave - Layer 1 (Back, Translucent) -->
+  <path fill="url(#grad-magenta-2)" opacity="0.45" filter="url(#shadow-deep)">
+    <animate attributeName="d" values="
+      M1970,-50 L680,-50 C800,260 900,160 1100,280 C1300,400 1500,100 1970,140 Z;
+      M1970,-50 L750,-50 C830,220 950,220 1120,260 C1290,300 1490,180 1970,180 Z;
+      M1970,-50 L680,-50 C800,260 900,160 1100,280 C1300,400 1500,100 1970,140 Z
+    " dur="11s" repeatCount="indefinite" />
   </path>
   
-  <text x="960" y="420" font-family="sans-serif" font-size="52" fill="#ffffff" font-weight="bold" text-anchor="middle" letter-spacing="4">
-    ORGANIC FLOW
-  </text>
+  <!-- 2. Magenta Wave - Layer 2 (Front, Luminous) -->
+  <path fill="url(#grad-magenta-1)" filter="url(#shadow-deep)">
+    <animate attributeName="d" values="
+      M1970,-50 L750,-50 C850,300 950,200 1150,320 C1350,440 1550,150 1970,180 Z;
+      M1970,-50 L820,-50 C900,250 1020,250 1200,300 C1380,350 1580,220 1970,220 Z;
+      M1970,-50 L700,-50 C800,330 900,180 1100,340 C1300,500 1500,120 1970,140 Z;
+      M1970,-50 L750,-50 C850,300 950,200 1150,320 C1350,440 1550,150 1970,180 Z
+    " dur="9s" repeatCount="indefinite" />
+  </path>
+
+  <!-- 3. Purple Wave - Layer 1 (Back, Translucent) -->
+  <path fill="url(#grad-purple-2)" opacity="0.5" filter="url(#shadow-deep)">
+    <animate attributeName="d" values="
+      M-50,-50 L800,-50 C700,220 600,420 400,480 C200,550 50,520 -50,640 Z;
+      M-50,-50 L700,-50 C600,260 500,460 300,500 C100,540 50,460 -50,560 Z;
+      M-50,-50 L800,-50 C700,220 600,420 400,480 C200,550 50,520 -50,640 Z
+    " dur="9s" repeatCount="indefinite" />
+  </path>
+
+  <!-- 4. Purple Wave - Layer 2 (Front, Luminous) -->
+  <path fill="url(#grad-purple-1)" filter="url(#shadow-deep)">
+    <animate attributeName="d" values="
+      M-50,-50 L850,-50 C750,250 650,450 450,520 C250,600 50,580 -50,700 Z;
+      M-50,-50 L750,-50 C650,300 550,500 350,550 C150,600 50,500 -50,620 Z;
+      M-50,-50 L900,-50 C800,220 700,400 480,500 C260,600 50,620 -50,740 Z;
+      M-50,-50 L850,-50 C750,250 650,450 450,520 C250,600 50,580 -50,700 Z
+    " dur="7s" repeatCount="indefinite" />
+  </path>
+
+  <!-- 5. Bottom Right Wave - Layer 1 (Back, Translucent) -->
+  <path fill="url(#grad-magenta-2)" opacity="0.45" filter="url(#shadow-deep)">
+    <animate attributeName="d" values="
+      M1970,1130 L1280,1130 C1280,1020 1330,920 1420,830 C1580,680 1730,800 1970,720 Z;
+      M1970,1130 L1350,1130 C1330,950 1370,860 1480,780 C1630,700 1780,820 1970,800 Z;
+      M1970,1130 L1280,1130 C1280,1020 1330,920 1420,830 C1580,680 1730,800 1970,720 Z
+    " dur="10s" repeatCount="indefinite" />
+  </path>
+
+  <!-- 6. Bottom Right Wave - Layer 2 (Front, Luminous) -->
+  <path fill="url(#grad-magenta-1)" filter="url(#shadow-deep)">
+    <animate attributeName="d" values="
+      M1970,1130 L1350,1130 C1350,1050 1380,950 1500,850 C1650,720 1800,850 1970,800 Z;
+      M1970,1130 L1420,1130 C1400,1000 1420,900 1550,820 C1700,740 1850,880 1970,850 Z;
+      M1970,1130 L1300,1130 C1300,1080 1350,980 1460,880 C1600,750 1780,820 1970,760 Z;
+      M1970,1130 L1350,1130 C1350,1050 1380,950 1500,850 C1650,720 1800,850 1970,800 Z
+    " dur="8s" repeatCount="indefinite" />
+  </path>
 </svg>`,
   },
 ];
@@ -120,7 +360,7 @@ export default function VideoConverterPage() {
   const [isExporting, setIsExporting] = useState(false);
   const [previewKey, setPreviewKey] = useState(0);
   const [isPlayingPreview, setIsPlayingPreview] = useState(true);
-  const [bgPattern, setBgPattern] = useState<"dark" | "checker" | "light">("dark");
+  const [bgPattern, setBgPattern] = useState<"dark" | "checker" | "light">("light");
   const [copied, setCopied] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [generatedVideoUrl, setGeneratedVideoUrl] = useState<string | null>(null);
