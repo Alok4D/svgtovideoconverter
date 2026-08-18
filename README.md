@@ -1,36 +1,124 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SVG to Video Studio (MP4 & ProRes MOV) 🎬
 
-## Getting Started
+A powerful, high-performance web application that compiles animated SVGs (SMIL, CSS transitions) directly into high-quality H.264 MP4 and Apple ProRes 422 MOV video files. Built specifically for stock video creators, designers, and motion graphic artists to speed up their Adobe Stock, Shutterstock, and Pond5 marketplace submissions.
 
-First, run the development server:
+---
 
+## 🔥 Key Features
+
+### 1. Advanced Live SVG Editor & Presets
+- **Monaco Code Editor:** Full XML syntax highlighting, auto-completion, and code folding for quick SVG editing.
+- **Preset Library:** Instantly load visual presets (e.g. Glowing Neon Pulsing, Rotating Spinners, Cyberpunk Portals, Floating Waves).
+- **Custom Uploads:** Upload your own animated SVG templates and render them instantly.
+
+### 2. Live Sandbox Preview
+- **Interactive Viewport:** Real-time preview of SMIL animations, CSS transforms, and inline SVG styles.
+- **Pattern Switcher:** Toggle between dark checkers, light checkers, and transparent background modes.
+- **Fullscreen Preview:** Inspect and check layout alignments before compiling.
+
+### 3. Professional Render Engine (Remotion & FFmpeg)
+- **High Resolution:** Supports HD, Full HD (1080p), and Ultra HD (4K / 3840x2160) configurations.
+- **FPS Control:** Set frame rates from 24 FPS, 30 FPS, up to 60 FPS.
+- **Dual Codec Support:**
+  - **H.264 (MP4):** Compressed web-ready files with high visual quality.
+  - **Apple ProRes 422 (MOV):** Professional production-grade video files for stock marketplaces.
+- **Persistent Job Queue:** Powered by MongoDB & Mongoose. Page reloads will not lose render progress, and history is securely stored.
+
+### 4. Marketplace SEO Kit (Multi-Provider AI)
+- **Automatic Metadata Generation:** Creates SEO titles and high-converting tag clouds tailored specifically for stock websites.
+- **Fallback Resiliency:** Checks for active API keys and falls back gracefully:
+  1. **xAI Grok** (using Grok-3-mini or Grok-2)
+  2. **OpenAI GPT** (using GPT-4o-mini)
+  3. **Google Gemini** (using Gemini-2.5-flash)
+- **Instant Exporters:** Download metadata as `.csv` spreadsheets (Adobe Stock bulk format) or `.txt` text files.
+
+### 5. Automated CDN Cloud Hosting
+- Rendered video files are automatically uploaded to your **Cloudinary CDN** and served instantly. 
+- Local files are auto-cleaned after successful upload, saving server storage space.
+
+---
+
+## 🛠️ Installation & Setup (Localhost)
+
+### 1. Prerequisites
+- **Node.js** (v18 or v20+ recommended)
+- **pnpm** (preferred) or npm/yarn
+- **FFmpeg** installed on your operating system
+
+### 2. Get the Code
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/Alok4D/svgtovideoconverter.git
+cd svgtovideoconverter
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 3. Environment Configuration
+Create a `.env` file in the root directory:
+```env
+# AI API Keys (At least one is required for SEO Kit)
+GROK_API_KEY=your_xai_grok_key
+OPENAI_API_KEY=your_openai_key
+GEMINI_API_KEY=your_gemini_key
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+# Model Selection for Grok
+TEXT_MODEL_BASIC=grok-3-mini
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# Database Connection (MongoDB Atlas)
+MONGODB_URL=mongodb+srv://<username>:<password>@cluster.mongodb.net/svg_to_video_db
+MONGODB_DB_NAME=svg_to_video_db
 
-## Learn More
+# Cloudinary Integration
+CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+CLOUDINARY_API_KEY=your_cloudinary_api_key
+CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+```
 
-To learn more about Next.js, take a look at the following resources:
+### 4. Run Locally
+```bash
+pnpm run dev
+```
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🚀 Cloud Deployment Options
 
-## Deploy on Vercel
+### Option A: Render.com (Free & Easiest)
+Render uses the preconfigured **`Dockerfile`** in the repository to automatically install Chromium, FFmpeg, and fonts.
+1. Sign up on [Render.com](https://render.com/) and create a new **Web Service**.
+2. Connect your GitHub repository.
+3. Select **`Docker`** as the **Runtime**.
+4. Select the **`Free`** tier.
+5. In **Advanced**, add all your `.env` variables.
+6. Click **Create Web Service**.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Option B: Hugging Face Spaces (Free & High RAM)
+Hugging Face offers 16GB RAM for free, which handles 4K rendering smoothly.
+1. Create a **New Space** on Hugging Face.
+2. Select **`Docker`** as the SDK and choose **`Blank`** template.
+3. Link your billing card in Hugging Face settings to unlock Docker Spaces (it remains $0/month free tier).
+4. Add your `.env` variables under **Settings > Variables and secrets**.
+5. Push the code to the Hugging Face Git remote:
+   ```bash
+   git remote add hf https://huggingface.co/spaces/YOUR_USERNAME/YOUR_SPACE_NAME
+   git push hf main --force
+   ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Option C: Ubuntu VPS (Hetzner / DigitalOcean)
+For dedicated performance, deploy on a Linux VPS:
+1. SSH into the VPS and install system dependencies:
+   ```bash
+   sudo apt update
+   sudo apt install -y ffmpeg chromium-browser nodejs pnpm
+   npm install -g pm2
+   ```
+2. Clone repository, run `pnpm install`, and `pnpm run build`.
+3. Create `ecosystem.config.js` and start the server with:
+   ```bash
+   pm2 start ecosystem.config.js
+   ```
+
+---
+
+## 📝 License
+This project is licensed under the [MIT License](LICENSE).
