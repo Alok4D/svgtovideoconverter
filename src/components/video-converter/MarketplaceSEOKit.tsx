@@ -131,7 +131,7 @@ export default function MarketplaceSEOKit({
           <Input
             value={metadataTitle}
             onChange={(e) => setMetadataTitle(e.target.value)}
-            className="w-full h-10 px-3 bg-[#f8f9fa] border-[#ced4da] text-[#2e2e2e] text-xs font-sans rounded-[4px]"
+            className="w-full h-10 px-3 bg-[#f8f9fa] border-[#ced4da] text-[#2e2e2e] text-sm font-sans rounded-[4px]"
             placeholder="Generating title..."
           />
         )}
@@ -166,11 +166,11 @@ export default function MarketplaceSEOKit({
             ))}
           </div>
         ) : (
-          <div className="flex flex-wrap gap-1.5 p-3 bg-[#f8f9fa] border border-[#ced4da] rounded-[4px] max-h-[160px] overflow-y-auto w-full">
+          <div className="flex flex-wrap gap-2 p-3 bg-[#f8f9fa] border border-[#ced4da] rounded-[4px] max-h-[180px] overflow-y-auto w-full">
             {metadataKeywords.split(",").filter(Boolean).map((tag, idx) => (
               <span
                 key={idx}
-                className="inline-flex items-center text-[10px] px-2 py-0.5 rounded-[3px] bg-white border border-[#ced4da] text-slate-700 font-sans shadow-sm"
+                className="inline-flex items-center text-xs px-2.5 py-1 rounded-[4px] bg-white border border-[#ced4da] text-slate-700 font-sans shadow-sm hover:border-[#5bb75b] transition-all cursor-default"
               >
                 {tag.trim()}
               </span>
